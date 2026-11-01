@@ -48,6 +48,25 @@ def list_tabs():
     return tabs
 
 
+ICONS = {
+    "view": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    "copy": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    "trash": '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+}
+
+
+def view_tab(w, t):
+    osa(f'''tell application "Google Chrome"
+  set w to window id {int(w)}
+  set ids to id of every tab of w
+  repeat with i from 1 to count of ids
+    if (item i of ids as text) is "{int(t)}" then set active tab index of w to i
+  end repeat
+  set index of w to 1
+  activate
+end tell''')
+
+
 def close_tab(w, t):
     osa(f'tell application "Google Chrome" to close (every tab of window id {int(w)} whose id is {int(t)})')
 
@@ -84,8 +103,9 @@ def render(tabs):
                 f'<li data-w="{tab["w"]}" data-t="{tab["t"]}" data-url="{html.escape(tab["url"])}">'
                 f'<span class="grip" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd()" '
                 f'title="Drag to another window">&#8942;&#8942;</span>'
-                f'<button onclick="closeTab(this)">Close</button>'
-                f'<button class="copy" onclick="copyUrl(this)">Copy URL</button>'
+                f'<button onclick="viewTab(this)" title="View tab" aria-label="View tab">{ICONS["view"]}</button>'
+                f'<button onclick="copyUrl(this)" title="Copy URL" aria-label="Copy URL">{ICONS["copy"]}</button>'
+                f'<button class="del" onclick="closeTab(this)" title="Close tab" aria-label="Close tab">{ICONS["trash"]}</button>'
                 f'<div><div class="title">{html.escape(tab["title"])}</div>'
                 f'<div class="url"><b>{html.escape(host)}</b> &middot; {url}</div></div></li>'
             )
@@ -101,9 +121,10 @@ ul{{list-style:none;padding:0;margin:0}}
 li{{display:flex;gap:12px;align-items:flex-start;padding:8px;border-bottom:1px solid #eee}}
 li:hover{{background:#f7f7f7}}
 .title{{font-weight:600}} .url{{color:#777;font-size:12px;word-break:break-all}} .url a{{color:#36c;text-decoration:none}} .url a:hover{{text-decoration:underline}}
-button{{flex:none;cursor:pointer;border:1px solid #c33;color:#c33;background:#fff;border-radius:4px;padding:3px 10px}}
-button:hover{{background:#c33;color:#fff}}
-button.copy{{border-color:#999;color:#555}} button.copy:hover{{background:#555;color:#fff}}
+button{{flex:none;cursor:pointer;border:1px solid #bbb;color:#555;background:#fff;border-radius:4px;padding:4px 6px;font-size:11px;min-width:30px}}
+button svg{{display:block;margin:auto}}
+button:hover{{background:#555;border-color:#555;color:#fff}}
+button.del{{border-color:#c33;color:#c33}} button.del:hover{{background:#c33;color:#fff}}
 #bar{{position:sticky;top:0;background:#fff;padding:8px 0;display:flex;gap:12px;align-items:center}}
 #q{{flex:1;padding:6px 8px;font-size:14px}}
 section{{border:2px dashed transparent;border-radius:6px;padding:0 6px}}
@@ -120,16 +141,29 @@ li.moving{{opacity:.4}}
 {"".join(sections)}
 <script>
 const TOKEN = {json.dumps(TOKEN)};
+function flash(btn, msg, ms) {{
+  if (!btn.dataset.icon) btn.dataset.icon = btn.innerHTML;
+  btn.textContent = msg;
+  setTimeout(() => btn.innerHTML = btn.dataset.icon, ms || 1500);
+}}
+async function post(path, body) {{
+  return fetch(path, {{method:'POST', headers:{{'Content-Type':'application/json','X-Token':TOKEN}}, body: JSON.stringify(body)}});
+}}
+async function viewTab(btn) {{
+  const li = btn.closest('li');
+  const r = await post('/view', {{w: +li.dataset.w, t: +li.dataset.t}});
+  if (!r.ok) flash(btn, 'Failed');
+}}
 async function closeTab(btn) {{
   const li = btn.closest('li');
-  btn.disabled = true; btn.textContent = '...';
+  btn.disabled = true; flash(btn, '...', 60000);
   const r = await fetch('/close', {{method:'POST', headers:{{'Content-Type':'application/json','X-Token':TOKEN}},
     body: JSON.stringify({{w: +li.dataset.w, t: +li.dataset.t}})}});
-  if (r.ok) {{ li.remove(); updateCounts(); }} else {{ btn.disabled = false; btn.textContent = 'Failed'; }}
+  if (r.ok) {{ li.remove(); updateCounts(); }} else {{ btn.disabled = false; flash(btn, 'Failed'); }}
 }}
 async function copyUrl(btn) {{
   await navigator.clipboard.writeText(btn.closest('li').dataset.url);
-  btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy URL', 1500);
+  flash(btn, 'Copied');
 }}
 let dragged = null;
 function dragStart(e) {{
@@ -165,8 +199,7 @@ async function drop(e) {{
   updateCounts();
 }}
 function alertRow(li, msg) {{
-  const b = li.querySelector('button'); b.textContent = msg;
-  setTimeout(() => b.textContent = 'Close', 2000);
+  flash(li.querySelector('button.del'), msg, 2000);
 }}
 function updateCounts() {{
   document.querySelectorAll('section').forEach(s => {{
@@ -196,12 +229,12 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
-        if self.path not in ("/close", "/move") or self.headers.get("X-Token") != TOKEN:
+        if self.path not in ("/close", "/move", "/view") or self.headers.get("X-Token") != TOKEN:
             return self.send_error(403)
         data = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         try:
-            if self.path == "/close":
-                close_tab(data["w"], data["t"])
+            if self.path in ("/close", "/view"):
+                (close_tab if self.path == "/close" else view_tab)(data["w"], data["t"])
                 self.send_response(204)
                 self.end_headers()
             else:

@@ -2,10 +2,11 @@
 
 A local web page that lists every open Google Chrome tab, grouped by window, so you can clear tab sludge fast.
 
-- **Close** any tab with one click.
+- **View** a tab (eye icon) to bring its window to the front and switch to it.
+- **Close** any tab with one click (trash icon).
 - **Move** a tab to another window by dragging its grip onto that window.
 - **Filter** by title or URL.
-- Click a URL to open it, or **Copy URL** to put the clean URL on your clipboard.
+- Click a URL to open it, or use the copy icon to put the clean URL on your clipboard.
 
 macOS only. It talks to Chrome through AppleScript. Python 3 standard library, no dependencies.
 
