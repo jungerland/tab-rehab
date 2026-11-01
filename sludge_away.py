@@ -76,12 +76,17 @@ def render(tabs):
         rows = []
         for tab in wtabs:
             host = urlparse(tab["url"]).netloc or tab["url"].split(":")[0]
+            url = html.escape(tab["url"])
+            # Only web URLs get a link; a page can't open chrome:// or file:// links anyway.
+            if urlparse(tab["url"]).scheme in ("http", "https"):
+                url = f'<a href="{url}" target="_blank" rel="noopener">{url}</a>'
             rows.append(
-                f'<li draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd()" data-w="{tab["w"]}" data-t="{tab["t"]}">'
-                f'<span class="grip" title="Drag to another window">&#8942;&#8942;</span>'
+                f'<li data-w="{tab["w"]}" data-t="{tab["t"]}">'
+                f'<span class="grip" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd()" '
+                f'title="Drag to another window">&#8942;&#8942;</span>'
                 f'<button onclick="closeTab(this)">Close</button>'
                 f'<div><div class="title">{html.escape(tab["title"])}</div>'
-                f'<div class="url"><b>{html.escape(host)}</b> &middot; {html.escape(tab["url"])}</div></div></li>'
+                f'<div class="url"><b>{html.escape(host)}</b> &middot; {url}</div></div></li>'
             )
         sections.append(
             f'<section data-w="{w}" ondragover="dragOver(event)" ondragleave="this.classList.remove(\'over\')" ondrop="drop(event)">'
@@ -94,7 +99,7 @@ h1{{margin:0 0 8px}} h2{{font-size:15px;margin:20px 0 6px;color:#555}} .count{{f
 ul{{list-style:none;padding:0;margin:0}}
 li{{display:flex;gap:12px;align-items:flex-start;padding:8px;border-bottom:1px solid #eee}}
 li:hover{{background:#f7f7f7}}
-.title{{font-weight:600}} .url{{color:#777;font-size:12px;word-break:break-all}}
+.title{{font-weight:600}} .url{{color:#777;font-size:12px;word-break:break-all}} .url a{{color:#36c;text-decoration:none}} .url a:hover{{text-decoration:underline}}
 button{{flex:none;cursor:pointer;border:1px solid #c33;color:#c33;background:#fff;border-radius:4px;padding:3px 10px}}
 button:hover{{background:#c33;color:#fff}}
 #bar{{position:sticky;top:0;background:#fff;padding:8px 0;display:flex;gap:12px;align-items:center}}
@@ -103,11 +108,11 @@ section{{border:2px dashed transparent;border-radius:6px;padding:0 6px}}
 body.dragging section{{border-color:#ddd}}
 section.over{{border-color:#36c;background:#f0f5ff}}
 li.moving{{opacity:.4}}
-.grip{{flex:none;cursor:grab;color:#bbb;letter-spacing:-3px;padding-top:3px;user-select:none}}
+.grip{{flex:none;cursor:grab;padding:3px 4px 0;color:#bbb;letter-spacing:-3px;user-select:none}}
 .hint{{color:#888;margin:0 0 8px}}
 </style></head><body>
 <h1>Chrome Tab Sludge-Away</h1>
-<p class="hint">Drag a tab onto another window to move it there (it lands at the end of that window).</p>
+<p class="hint">Drag a tab by its grip (&#8942;&#8942;) onto another window to move it there (it lands at the end of that window).</p>
 <div id="bar"><input id="q" placeholder="Filter by title or URL" oninput="filter()"><span id="total">{len(tabs)} tabs</span>
 <a href="/">Refresh</a></div>
 {"".join(sections)}
@@ -123,6 +128,7 @@ async function closeTab(btn) {{
 let dragged = null;
 function dragStart(e) {{
   dragged = e.target.closest('li');
+  e.dataTransfer.setDragImage(dragged, 10, 10);
   dragged.classList.add('moving');
   document.body.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
