@@ -226,7 +226,7 @@ li.moving,li.busy{opacity:.45}
 .title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;color:var(--ink)}
 a.title:hover{text-decoration:underline;text-underline-offset:2px}
 .host{max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-3);font-size:11px;text-align:right}
-.host.err{max-width:320px;color:var(--red-ink);font-weight:600}
+.host.err{max-width:320px;color:var(--ink);font-weight:700}
 .more{position:absolute;right:32px;top:3px;display:flex;gap:2px;padding-left:6px;background:inherit;opacity:0}
 li:hover .more,li:focus-within .more{opacity:1}
 .more button,.del{width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;
@@ -562,7 +562,7 @@ function refresh(a) {
 
 ERROR_PAGE = '''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Tab Rehab</title>
 <style>body{font:14px/1.5 "Hiragino Sans",system-ui,sans-serif;color:#16181b;max-width:640px;margin:48px auto;padding:0 16px}
-h1{font-size:18px;margin:0 0 12px}.box{border:1px solid #d5d9de;border-top:3px solid #d7000f;padding:12px 16px}
+h1{font-size:18px;margin:0 0 12px}.box{border:1px solid #d5d9de;border-top:3px solid #16181b;padding:12px 16px}
 code{font-size:12px;color:#4a5059}</style></head><body><h1>Tab Rehab can't read your Chrome tabs</h1>
 <div class="box"><p><b>{reason}</b></p><p>Check that Google Chrome is open. The first run asks to let your terminal control Chrome.
 If you declined, turn it on under System Settings &gt; Privacy &amp; Security &gt; Automation, then <a href="/">try again</a>.</p>
