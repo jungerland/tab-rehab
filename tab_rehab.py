@@ -39,6 +39,18 @@ def osa(script):
     return r.stdout
 
 
+def friendly(err):
+    """Turn an osascript error into one short sentence for the page."""
+    e = str(err)
+    if "-1743" in e or "Not authorized" in e:
+        return "macOS blocked access to Chrome. Allow your terminal under System Settings > Privacy & Security > Automation."
+    if "-600" in e or "isn’t running" in e or "isn't running" in e:
+        return "Chrome isn't running."
+    if "Can’t get" in e or "Can't get" in e or "Invalid index" in e:
+        return "That tab or window is gone. Refresh the page."
+    return e.splitlines()[-1][:160] if e else "Unknown error."
+
+
 def list_tabs():
     tabs = []
     for rec in osa(LIST_SCRIPT).rstrip("\n").split(RS):
@@ -79,6 +91,34 @@ end tell''')
 
 def close_tab(w, t):
     osa(f'tell application "Google Chrome" to close (every tab of window id {int(w)} whose id is {int(t)})')
+
+
+def close_many(tabs):
+    """Close many tabs in one osascript call. Returns the "w:t" keys that failed."""
+    lines = [f'try\n close (every tab of window id {int(x["w"])} whose id is {int(x["t"])})\n'
+             f'on error\n set failed to failed & "{int(x["w"])}:{int(x["t"])} "\nend try' for x in tabs]
+    out = osa('set failed to ""\ntell application "Google Chrome"\n' + "\n".join(lines) + '\nend tell\nreturn failed')
+    return out.split()
+
+
+def applescript_str(s):
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def reopen_tab(w, url):
+    """Reopen a URL at the end of window w, or the front window if w is gone. Returns (window id, tab id)."""
+    out = osa(f'''tell application "Google Chrome"
+  try
+    set win to window id {int(w)}
+  on error
+    if (count of windows) is 0 then make new window
+    set win to front window
+  end try
+  set newTab to make new tab at end of tabs of win with properties {{URL:{applescript_str(url)}}}
+  return ((id of win) as text) & " " & ((id of newTab) as text)
+end tell''')
+    win, tab = out.split()
+    return int(win), int(tab)
 
 
 def move_tab(w, t, to):
@@ -124,26 +164,41 @@ body{margin:0;background:var(--ground);color:var(--ink);
 ::selection{background:var(--red);color:#fff}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+input[type=checkbox]{accent-color:var(--red);width:14px;height:14px;margin:0;cursor:pointer}
 header{display:flex;align-items:baseline;gap:12px;padding:14px 16px 10px}
 h1{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:0}
 #total{color:var(--ink-2);font-size:12px}
-#bar{position:sticky;top:0;z-index:2;background:var(--panel);border-top:1px solid var(--rule);
+#bar{position:sticky;top:0;z-index:3;background:var(--panel);border-top:1px solid var(--rule);
   border-bottom:1px solid var(--rule-strong);padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
 #bar label{font-weight:600;color:var(--ink-2)}
 #q{width:280px;height:28px;padding:0 8px;font:inherit;font-size:13px;color:var(--ink);background:#fff;
   border:1px solid var(--rule-strong);border-radius:2px}
 #q::placeholder{color:var(--ink-3)}
-#shown{color:var(--ink-2);min-width:90px}
+#shown{color:var(--ink-2)}
+.purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:var(--red);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.purge:hover{background:var(--red-ink)}
+.purge:disabled{opacity:.6;cursor:progress}
 #chips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
 .chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 0;border:1px solid var(--rule-strong);
   border-radius:2px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
 .chip .tab{height:100%;border-radius:1px 0 0 1px}
 .chip:hover{border-color:var(--ink)}
 .chip.over,section.over{outline:2px solid var(--red);outline-offset:-1px;background:var(--red-wash)}
+#tray{position:relative}
+#tray summary{cursor:pointer;color:var(--ink);font-weight:600;list-style:none;height:28px;display:flex;align-items:center;
+  padding:0 8px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
+#tray summary::-webkit-details-marker{display:none}
+#tray[open] summary{border-color:var(--ink)}
+#tray ol{position:absolute;right:0;top:32px;width:420px;max-height:60vh;overflow:auto;margin:0;padding:0;list-style:none;
+  background:#fff;border:1px solid var(--rule-strong);box-shadow:0 6px 18px rgba(22,24,27,.14)}
+#tray li{grid-template-columns:24px minmax(0,1fr) auto;padding:0 6px}
+#tray .note{padding:6px 8px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
+.linkbtn{border:0;background:none;padding:0 4px;height:24px;font:inherit;font-weight:700;color:var(--red-ink);cursor:pointer;
+  text-decoration:underline;text-underline-offset:2px}
 #refresh{font-weight:600;color:var(--ink);border-bottom:1px solid var(--rule-strong)}
 #refresh:hover{border-color:var(--ink)}
 .hint{margin:0;padding:6px 16px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
-main{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:10px;padding:10px 16px 40px;align-items:start}
+main{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:10px;padding:10px 16px 80px;align-items:start}
 section{border:1px solid var(--rule);background:#fff;min-width:0}
 section h2{display:flex;align-items:center;gap:8px;margin:0;height:28px;padding:0 8px 0 0;font-size:12px;font-weight:600;
   border-bottom:1px solid var(--rule);background:var(--panel)}
@@ -152,11 +207,12 @@ section h2{display:flex;align-items:center;gap:8px;margin:0;height:28px;padding:
 section h2 .count{font-weight:400;color:var(--ink-2)}
 section h2 .doms{margin-left:auto;font-weight:400;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 ul{list-style:none;margin:0;padding:0}
-li{display:grid;grid-template-columns:14px 18px minmax(0,1fr) auto auto;align-items:center;gap:6px;
-  height:var(--row);padding:0 4px 0 2px;border-bottom:1px solid #eceef1}
+li{display:grid;grid-template-columns:22px 14px 18px minmax(0,1fr) auto auto;align-items:center;gap:6px;
+  height:var(--row);padding:0 4px 0 6px;border-bottom:1px solid #eceef1}
 li:last-child{border-bottom:0}
 li:hover,li:focus-within{background:#f7f8fa}
-li.moving{opacity:.4}
+li.sel{background:var(--red-wash)}
+li.moving,li.busy{opacity:.45}
 .grip{display:flex;justify-content:center;color:var(--rule-strong);cursor:grab}
 .grip:hover{color:var(--ink)}
 .mono{width:18px;height:18px;border-radius:2px;display:flex;align-items:center;justify-content:center;
@@ -164,6 +220,7 @@ li.moving{opacity:.4}
 .title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;color:var(--ink)}
 a.title:hover{text-decoration:underline;text-underline-offset:2px}
 .host{max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-3);font-size:11px;text-align:right}
+.host.err{max-width:320px;color:var(--red-ink);font-weight:600}
 .acts{display:flex;gap:2px}
 .acts button{width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;
   background:transparent;color:var(--ink-3);cursor:pointer;font:inherit;font-size:10px}
@@ -172,38 +229,148 @@ a.title:hover{text-decoration:underline;text-underline-offset:2px}
 li:hover .soft,li:focus-within .soft{opacity:1}
 .acts .del{color:var(--red-ink)}
 .acts .del:hover{background:var(--red);color:#fff}
-.acts button:disabled{cursor:progress;opacity:.6}
 .acts svg{width:15px;height:15px}
+#toast{position:fixed;left:16px;bottom:16px;z-index:4;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);
+  padding:10px 12px;background:var(--ink);color:#fff;border-radius:2px;box-shadow:0 8px 24px rgba(22,24,27,.25)}
+#toast .linkbtn{color:#fff}
+#toast small{color:#c9cdd3}
 .empty{padding:40px 16px;color:var(--ink-2);font-size:13px}
 @media (prefers-reduced-motion:no-preference){li,.chip,.acts button{transition:background-color .15s ease-out,opacity .15s ease-out}}
 '''
 
 JS = '''
 const TOKEN = __TOKEN__;
-const TOTAL = () => document.querySelectorAll('main li').length;
-function flash(btn, msg, ms) {
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const rows = () => $$('main li');
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+async function call(path, body) {
+  try {
+    const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json','X-Token':TOKEN}, body: JSON.stringify(body)});
+    const data = r.status === 204 ? {} : await r.json().catch(() => ({}));
+    return r.ok ? {ok: true, data} : {ok: false, error: data.error || ('Error ' + r.status)};
+  } catch (e) {
+    return {ok: false, error: 'Tab Rehab server is not running. Restart it and refresh.'};
+  }
+}
+function rowError(li, msg) {
+  const h = li.querySelector('.host');
+  if (!h.dataset.text) h.dataset.text = h.textContent;
+  h.textContent = msg; h.title = msg; h.classList.add('err');
+  clearTimeout(h._t);
+  h._t = setTimeout(() => { h.textContent = h.dataset.text; h.title = ''; h.classList.remove('err'); }, 5000);
+}
+function flash(btn, msg) {
   if (!btn.dataset.icon) btn.dataset.icon = btn.innerHTML;
   btn.textContent = msg;
-  setTimeout(() => btn.innerHTML = btn.dataset.icon, ms || 1500);
-}
-async function post(path, body) {
-  return fetch(path, {method:'POST', headers:{'Content-Type':'application/json','X-Token':TOKEN}, body: JSON.stringify(body)});
+  setTimeout(() => btn.innerHTML = btn.dataset.icon, 1500);
 }
 async function viewTab(btn) {
   const li = btn.closest('li');
-  const r = await post('/view', {w: +li.dataset.w, t: +li.dataset.t});
-  if (!r.ok) flash(btn, 'Failed');
-}
-async function closeTab(btn) {
-  const li = btn.closest('li');
-  btn.disabled = true; flash(btn, '...', 60000);
-  const r = await post('/close', {w: +li.dataset.w, t: +li.dataset.t});
-  if (r.ok) { li.remove(); updateCounts(); } else { btn.disabled = false; flash(btn, 'Failed'); }
+  const r = await call('/view', {w: +li.dataset.w, t: +li.dataset.t});
+  if (!r.ok) rowError(li, r.error);
 }
 async function copyUrl(btn) {
-  await navigator.clipboard.writeText(btn.closest('li').dataset.url);
-  flash(btn, 'Copied');
+  try { await navigator.clipboard.writeText(btn.closest('li').dataset.url); flash(btn, 'Copied'); }
+  catch (e) { rowError(btn.closest('li'), 'Copy blocked by the browser.'); }
 }
+
+/* Closing, undo */
+const closed = [];          // newest last: {li, w, url, title}
+async function closeRows(lis) {
+  if (!lis.length) return;
+  lis.forEach(li => li.classList.add('busy'));
+  const r = lis.length === 1
+    ? await call('/close', {w: +lis[0].dataset.w, t: +lis[0].dataset.t})
+    : await call('/close-many', {tabs: lis.map(li => ({w: +li.dataset.w, t: +li.dataset.t}))});
+  if (!r.ok) { lis.forEach(li => { li.classList.remove('busy'); rowError(li, r.error); }); return; }
+  const failed = new Set(r.data.failed || []);
+  const done = [];
+  lis.forEach(li => {
+    li.classList.remove('busy');
+    if (failed.has(li.dataset.w + ':' + li.dataset.t)) { rowError(li, "Couldn't close. Refresh the page."); return; }
+    setSel(li, false);
+    done.push({li, w: +li.dataset.w, url: li.dataset.url, title: li.querySelector('.title').textContent});
+    li.remove();
+  });
+  if (!done.length) return;
+  closed.push(...done);
+  updateCounts(); renderTray();
+  toast('Closed ' + plural(done.length, 'tab') + '.', () => reopen(done));
+}
+function closeTab(btn) { return closeRows([btn.closest('li')]); }
+function closeSelected() { return closeRows(rows().filter(li => li.classList.contains('sel') && !li.hidden)); }
+function closeShown() { return closeRows(rows().filter(li => !li.hidden)); }
+async function reopen(entries) {
+  let lost = 0;
+  for (const e of entries) {
+    const r = await call('/reopen', {w: e.w, url: e.url});
+    if (!r.ok) { toast("Couldn't reopen: " + r.error); return; }
+    closed.splice(closed.indexOf(e), 1);
+    const sec = $('section[data-w="' + r.data.w + '"]');
+    if (sec) { e.li.dataset.w = r.data.w; e.li.dataset.t = r.data.t; sec.querySelector('ul').appendChild(e.li); }
+    else lost++;
+  }
+  updateCounts(); renderTray();
+  toast('Reopened ' + plural(entries.length, 'tab') + '.' + (lost ? ' Refresh to see ' + (lost === 1 ? 'it' : 'them') + '.' : ''));
+}
+function renderTray() {
+  const tray = $('#tray');
+  tray.hidden = !closed.length;
+  tray.querySelector('summary').textContent = 'Recently closed (' + closed.length + ')';
+  const ol = tray.querySelector('ol');
+  ol.innerHTML = '<p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p>';
+  closed.slice().reverse().forEach(e => {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="mono"></span><span class="title"></span><button class="linkbtn">Reopen</button>';
+    const m = e.li.querySelector('.mono');
+    li.querySelector('.mono').replaceWith(m.cloneNode(true));
+    li.querySelector('.title').textContent = e.title;
+    li.querySelector('.title').title = e.url;
+    li.querySelector('button').onclick = () => reopen([e]);
+    ol.appendChild(li);
+  });
+}
+let toastTimer;
+function toast(msg, undo) {
+  const t = $('#toast');
+  t.innerHTML = '';
+  const s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
+  if (undo) {
+    const b = document.createElement('button'); b.className = 'linkbtn'; b.textContent = 'Undo';
+    b.onclick = () => { t.hidden = true; undo(); };
+    t.appendChild(b);
+    const n = document.createElement('small'); n.textContent = 'Reopens without back/forward history'; t.appendChild(n);
+  }
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.hidden = true, undo ? 8000 : 4000);
+}
+
+/* Selection */
+let lastPick = null;
+function setSel(li, on) { li.classList.toggle('sel', on); li.querySelector('.pick').checked = on; }
+function pick(e) {
+  const box = e.target, li = box.closest('li');
+  if (e.shiftKey && lastPick && lastPick !== li) {
+    const vis = rows().filter(r => !r.hidden);
+    const a = vis.indexOf(lastPick), b = vis.indexOf(li);
+    if (a >= 0 && b >= 0) vis.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(r => setSel(r, box.checked));
+  }
+  setSel(li, box.checked);
+  lastPick = li;
+  updateBar();
+}
+function updateBar() {
+  const sel = rows().filter(li => li.classList.contains('sel') && !li.hidden).length;
+  const shown = rows().filter(li => !li.hidden).length;
+  const q = $('#q').value.trim();
+  $('#closeSel').hidden = !sel;
+  $('#closeSel').textContent = 'Close ' + sel + ' selected';
+  $('#closeShown').hidden = !!sel || !q || !shown;
+  $('#closeShown').textContent = 'Close all ' + shown + ' shown';
+}
+
+/* Moving */
 let dragged = null;
 function dragStart(e) {
   dragged = e.target.closest('li');
@@ -214,7 +381,7 @@ function dragStart(e) {
 }
 function dragEnd() {
   if (dragged) dragged.classList.remove('moving');
-  document.querySelectorAll('.over').forEach(s => s.classList.remove('over'));
+  $$('.over').forEach(s => s.classList.remove('over'));
   dragged = null;
 }
 function dragOver(e) {
@@ -223,41 +390,42 @@ function dragOver(e) {
   e.preventDefault();
   s.classList.add('over');
 }
-async function drop(e) {
+async function moveRow(li, w) {
+  if (w === li.dataset.w) return;
+  li.classList.add('busy');
+  const r = await call('/move', {w: +li.dataset.w, t: +li.dataset.t, to: +w});
+  li.classList.remove('busy');
+  if (!r.ok) { rowError(li, 'Move failed: ' + r.error); return; }
+  li.dataset.w = w; li.dataset.t = r.data.t;
+  $('section[data-w="' + w + '"] ul').appendChild(li);
+  updateCounts();
+}
+function drop(e) {
   e.preventDefault();
   const w = e.currentTarget.dataset.w, li = dragged;
   e.currentTarget.classList.remove('over');
-  if (!li || w === li.dataset.w) return;
-  const r = await post('/move', {w: +li.dataset.w, t: +li.dataset.t, to: +w});
-  if (!r.ok) { alertRow(li, 'Move failed'); return; }
-  const {t} = await r.json();
-  li.dataset.w = w; li.dataset.t = t;
-  document.querySelector('section[data-w="' + w + '"] ul').appendChild(li);
-  updateCounts();
-}
-function alertRow(li, msg) {
-  flash(li.querySelector('button.del'), msg, 2000);
+  if (li) moveRow(li, w);
 }
 function jump(chip) {
-  document.querySelector('section[data-w="' + chip.dataset.w + '"]').scrollIntoView({block: 'start'});
+  $('section[data-w="' + chip.dataset.w + '"]').scrollIntoView({block: 'start'});
 }
-const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+
+/* Counts and filter */
 function updateCounts() {
-  document.querySelectorAll('main section').forEach(s => {
+  $$('main section').forEach(s => {
     const n = s.querySelectorAll('li').length;
-    const chip = document.querySelector('.chip[data-w="' + s.dataset.w + '"]');
-    if (!n) { s.remove(); if (chip) chip.remove(); return; }
+    const chip = $('.chip[data-w="' + s.dataset.w + '"]');
     s.querySelector('.count').textContent = plural(n, 'tab');
-    if (chip) chip.querySelector('.n').textContent = n;
+    if (chip) { chip.querySelector('.n').textContent = n; chip.hidden = !n; }
   });
-  document.getElementById('total').textContent = plural(TOTAL(), 'tab') + ' in ' +
-    plural(document.querySelectorAll('main section').length, 'window');
+  const wins = $$('main section').filter(s => s.querySelector('li')).length;
+  $('#total').textContent = plural(rows().length, 'tab') + ' in ' + plural(wins, 'window');
   filter();
 }
 function filter() {
-  const q = document.getElementById('q').value.trim().toLowerCase();
+  const q = $('#q').value.trim().toLowerCase();
   let shown = 0;
-  document.querySelectorAll('main section').forEach(s => {
+  $$('main section').forEach(s => {
     let any = false;
     s.querySelectorAll('li').forEach(li => {
       const hit = !q || li.dataset.find.includes(q);
@@ -265,9 +433,18 @@ function filter() {
     });
     s.hidden = !any;
   });
-  document.getElementById('shown').textContent = q ? shown + ' of ' + plural(TOTAL(), 'tab') : '';
+  $('#shown').textContent = q ? shown + ' of ' + plural(rows().length, 'tab') : '';
+  updateBar();
 }
 '''
+
+ERROR_PAGE = '''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Tab Rehab</title>
+<style>body{font:14px/1.5 "Hiragino Sans",system-ui,sans-serif;color:#16181b;max-width:640px;margin:48px auto;padding:0 16px}
+h1{font-size:18px;margin:0 0 12px}.box{border:1px solid #d5d9de;border-top:3px solid #d7000f;padding:12px 16px}
+code{font-size:12px;color:#4a5059}</style></head><body><h1>Tab Rehab can't read your Chrome tabs</h1>
+<div class="box"><p><b>{reason}</b></p><p>Check that Google Chrome is open. The first run asks to let your terminal control Chrome.
+If you declined, turn it on under System Settings &gt; Privacy &amp; Security &gt; Automation, then <a href="/">try again</a>.</p>
+<p><code>{detail}</code></p></div></body></html>'''
 
 
 def render(tabs):
@@ -292,6 +469,7 @@ def render(tabs):
             find = html.escape(f'{tab["title"]} {tab["url"]}'.lower())
             rows.append(
                 f'<li data-w="{w}" data-t="{tab["t"]}" data-url="{url}" data-find="{find}">'
+                f'<input type="checkbox" class="pick" onclick="pick(event)" aria-label="Select tab">'
                 f'<span class="grip" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd()" '
                 f'title="Drag onto another window">{ICONS["grip"]}</span>'
                 f'<span class="mono" style="background:hsl({hue} 55% 91%);color:hsl({hue} 60% 26%)" aria-hidden="true">'
@@ -320,43 +498,53 @@ def render(tabs):
 <meta name="viewport" content="width=device-width,initial-scale=1"><style>{CSS}</style></head><body>
 <header><h1>Tab Rehab</h1><span id="total">{total}</span></header>
 <div id="bar"><label for="q">Filter</label><input id="q" placeholder="Title or URL" oninput="filter()" autocomplete="off">
-<span id="shown"></span><div id="chips">{"".join(chips)}</div><a id="refresh" href="/">Refresh</a></div>
-<p class="hint">Drag a tab by its grip onto a window or a window chip to move it. Moving reopens the page there, so its back/forward history is lost.</p>
-<main>{body}</main>
+<span id="shown"></span><button id="closeSel" class="purge" onclick="closeSelected()" hidden></button>
+<button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
+<div id="chips">{"".join(chips)}</div>
+<details id="tray" hidden><summary></summary><ol></ol></details><a id="refresh" href="/">Refresh</a></div>
+<p class="hint">Check tabs to close them together (shift-click selects a range). Drag a tab by its grip onto a window or a window chip to move it.
+Moving reopens the page there, so its back/forward history is lost.</p>
+<main>{body}</main><div id="toast" role="status" hidden></div>
 <script>{JS.replace("__TOKEN__", json.dumps(TOKEN))}</script></body></html>'''
 
 
 class Handler(BaseHTTPRequestHandler):
+    def reply(self, code, body=b"", ctype="application/json"):
+        self.send_response(code)
+        if body:
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         if self.path != "/":
             return self.send_error(404)
         try:
             body = render(list_tabs()).encode()
         except RuntimeError as e:
-            return self.send_error(500, str(e))
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(body)
+            page = ERROR_PAGE.replace("{reason}", html.escape(friendly(e))).replace("{detail}", html.escape(str(e)))
+            return self.reply(500, page.encode(), "text/html; charset=utf-8")
+        self.reply(200, body, "text/html; charset=utf-8")
 
     def do_POST(self):
-        if self.path not in ("/close", "/move", "/view") or self.headers.get("X-Token") != TOKEN:
+        if self.path not in ("/close", "/close-many", "/move", "/view", "/reopen") or self.headers.get("X-Token") != TOKEN:
             return self.send_error(403)
         data = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         try:
             if self.path in ("/close", "/view"):
                 (close_tab if self.path == "/close" else view_tab)(data["w"], data["t"])
-                self.send_response(204)
-                self.end_headers()
+                return self.reply(204)
+            if self.path == "/close-many":
+                out = {"failed": close_many(data["tabs"])}
+            elif self.path == "/reopen":
+                w, t = reopen_tab(data["w"], str(data["url"]))
+                out = {"w": w, "t": t}
             else:
-                new_id = move_tab(data["w"], data["t"], data["to"])
-                body = json.dumps({"t": new_id}).encode()
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                self.wfile.write(body)
-        except (RuntimeError, ValueError) as e:
-            self.send_error(500, str(e))
+                out = {"t": move_tab(data["w"], data["t"], data["to"])}
+            self.reply(200, json.dumps(out).encode())
+        except (RuntimeError, ValueError, KeyError) as e:
+            self.reply(500, json.dumps({"error": friendly(e)}).encode())
 
     def log_message(self, *args):
         pass
