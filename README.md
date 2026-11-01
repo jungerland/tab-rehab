@@ -5,7 +5,7 @@ A local web page that lists every open Google Chrome tab, grouped by window, so 
 - **Close** any tab with one click.
 - **Move** a tab to another window by dragging its grip onto that window.
 - **Filter** by title or URL.
-- Click a URL to open it; titles and URLs are selectable for copying.
+- Click a URL to open it, or **Copy URL** to put the clean URL on your clipboard.
 
 macOS only. It talks to Chrome through AppleScript. Python 3 standard library, no dependencies.
 

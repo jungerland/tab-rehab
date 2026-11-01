@@ -81,10 +81,11 @@ def render(tabs):
             if urlparse(tab["url"]).scheme in ("http", "https"):
                 url = f'<a href="{url}" target="_blank" rel="noopener">{url}</a>'
             rows.append(
-                f'<li data-w="{tab["w"]}" data-t="{tab["t"]}">'
+                f'<li data-w="{tab["w"]}" data-t="{tab["t"]}" data-url="{html.escape(tab["url"])}">'
                 f'<span class="grip" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd()" '
                 f'title="Drag to another window">&#8942;&#8942;</span>'
                 f'<button onclick="closeTab(this)">Close</button>'
+                f'<button class="copy" onclick="copyUrl(this)">Copy URL</button>'
                 f'<div><div class="title">{html.escape(tab["title"])}</div>'
                 f'<div class="url"><b>{html.escape(host)}</b> &middot; {url}</div></div></li>'
             )
@@ -102,6 +103,7 @@ li:hover{{background:#f7f7f7}}
 .title{{font-weight:600}} .url{{color:#777;font-size:12px;word-break:break-all}} .url a{{color:#36c;text-decoration:none}} .url a:hover{{text-decoration:underline}}
 button{{flex:none;cursor:pointer;border:1px solid #c33;color:#c33;background:#fff;border-radius:4px;padding:3px 10px}}
 button:hover{{background:#c33;color:#fff}}
+button.copy{{border-color:#999;color:#555}} button.copy:hover{{background:#555;color:#fff}}
 #bar{{position:sticky;top:0;background:#fff;padding:8px 0;display:flex;gap:12px;align-items:center}}
 #q{{flex:1;padding:6px 8px;font-size:14px}}
 section{{border:2px dashed transparent;border-radius:6px;padding:0 6px}}
@@ -124,6 +126,10 @@ async function closeTab(btn) {{
   const r = await fetch('/close', {{method:'POST', headers:{{'Content-Type':'application/json','X-Token':TOKEN}},
     body: JSON.stringify({{w: +li.dataset.w, t: +li.dataset.t}})}});
   if (r.ok) {{ li.remove(); updateCounts(); }} else {{ btn.disabled = false; btn.textContent = 'Failed'; }}
+}}
+async function copyUrl(btn) {{
+  await navigator.clipboard.writeText(btn.closest('li').dataset.url);
+  btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy URL', 1500);
 }}
 let dragged = null;
 function dragStart(e) {{
