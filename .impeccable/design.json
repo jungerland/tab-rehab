@@ -1,0 +1,367 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T23:26:51+00:00",
+  "title": "Design System: Tab Rehab",
+  "extensions": {
+    "colorMeta": {
+      "utility-red": {
+        "role": "primary",
+        "displayName": "Utility Red",
+        "canonical": "oklch(56% 0.226 27)",
+        "tonalRamp": [
+          "oklch(15% 0.2 27)",
+          "oklch(26% 0.2 27)",
+          "oklch(38% 0.2 27)",
+          "oklch(50% 0.2 27)",
+          "oklch(62% 0.2 27)",
+          "oklch(74% 0.2 27)",
+          "oklch(85% 0.2 27)",
+          "oklch(95% 0.2 27)"
+        ]
+      },
+      "red-ink": {
+        "role": "primary",
+        "displayName": "Pressed Red",
+        "canonical": "oklch(49% 0.2 27)",
+        "tonalRamp": [
+          "oklch(15% 0.18 27)",
+          "oklch(26% 0.18 27)",
+          "oklch(38% 0.18 27)",
+          "oklch(50% 0.18 27)",
+          "oklch(62% 0.18 27)",
+          "oklch(74% 0.18 27)",
+          "oklch(85% 0.18 27)",
+          "oklch(95% 0.18 27)"
+        ]
+      },
+      "red-wash": {
+        "role": "primary",
+        "displayName": "Selection Wash",
+        "canonical": "oklch(97% 0.014 17)",
+        "tonalRamp": [
+          "oklch(15% 0.05 17)",
+          "oklch(26% 0.05 17)",
+          "oklch(38% 0.05 17)",
+          "oklch(50% 0.05 17)",
+          "oklch(62% 0.05 17)",
+          "oklch(74% 0.05 17)",
+          "oklch(85% 0.05 17)",
+          "oklch(95% 0.05 17)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(21% 0.006 255)",
+        "tonalRamp": [
+          "oklch(15% 0.006 255)",
+          "oklch(26% 0.006 255)",
+          "oklch(38% 0.006 255)",
+          "oklch(50% 0.006 255)",
+          "oklch(62% 0.006 255)",
+          "oklch(74% 0.006 255)",
+          "oklch(85% 0.006 255)",
+          "oklch(95% 0.006 255)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "oklch(44% 0.017 255)",
+        "tonalRamp": [
+          "oklch(15% 0.017 255)",
+          "oklch(26% 0.017 255)",
+          "oklch(38% 0.017 255)",
+          "oklch(50% 0.017 255)",
+          "oklch(62% 0.017 255)",
+          "oklch(74% 0.017 255)",
+          "oklch(85% 0.017 255)",
+          "oklch(95% 0.017 255)"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Pewter",
+        "canonical": "oklch(52% 0.017 255)",
+        "tonalRamp": [
+          "oklch(15% 0.017 255)",
+          "oklch(26% 0.017 255)",
+          "oklch(38% 0.017 255)",
+          "oklch(50% 0.017 255)",
+          "oklch(62% 0.017 255)",
+          "oklch(74% 0.017 255)",
+          "oklch(85% 0.017 255)",
+          "oklch(95% 0.017 255)"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(50% 0 0)",
+          "oklch(62% 0 0)",
+          "oklch(74% 0 0)",
+          "oklch(85% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel Gray",
+        "canonical": "oklch(96.7% 0.003 265)",
+        "tonalRamp": [
+          "oklch(15% 0.004 265)",
+          "oklch(26% 0.004 265)",
+          "oklch(38% 0.004 265)",
+          "oklch(50% 0.004 265)",
+          "oklch(62% 0.004 265)",
+          "oklch(74% 0.004 265)",
+          "oklch(85% 0.004 265)",
+          "oklch(95% 0.004 265)"
+        ]
+      },
+      "row-hover": {
+        "role": "neutral",
+        "displayName": "Row Hover",
+        "canonical": "oklch(98% 0.003 265)",
+        "tonalRamp": [
+          "oklch(15% 0.004 265)",
+          "oklch(26% 0.004 265)",
+          "oklch(38% 0.004 265)",
+          "oklch(50% 0.004 265)",
+          "oklch(62% 0.004 265)",
+          "oklch(74% 0.004 265)",
+          "oklch(85% 0.004 265)",
+          "oklch(95% 0.004 265)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(88% 0.008 250)",
+        "tonalRamp": [
+          "oklch(15% 0.008 250)",
+          "oklch(26% 0.008 250)",
+          "oklch(38% 0.008 250)",
+          "oklch(50% 0.008 250)",
+          "oklch(62% 0.008 250)",
+          "oklch(74% 0.008 250)",
+          "oklch(85% 0.008 250)",
+          "oklch(95% 0.008 250)"
+        ]
+      },
+      "row-rule": {
+        "role": "neutral",
+        "displayName": "Row Hairline",
+        "canonical": "oklch(94.5% 0.004 260)",
+        "tonalRamp": [
+          "oklch(15% 0.004 260)",
+          "oklch(26% 0.004 260)",
+          "oklch(38% 0.004 260)",
+          "oklch(50% 0.004 260)",
+          "oklch(62% 0.004 260)",
+          "oklch(74% 0.004 260)",
+          "oklch(85% 0.004 260)",
+          "oklch(95% 0.004 260)"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "oklch(66% 0.017 255)",
+        "tonalRamp": [
+          "oklch(15% 0.017 255)",
+          "oklch(26% 0.017 255)",
+          "oklch(38% 0.017 255)",
+          "oklch(50% 0.017 255)",
+          "oklch(62% 0.017 255)",
+          "oklch(74% 0.017 255)",
+          "oklch(85% 0.017 255)",
+          "oklch(95% 0.017 255)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page title only."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Window header names, letter tabs, chip counts, purge buttons."
+      },
+      "row-title": {
+        "displayName": "Row Title",
+        "purpose": "Tab titles in rows; the text the eye scans."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Everything else, tabular numerals on."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Hosts in rows and kbd keys."
+      }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 2px 6px rgba(22,24,27,.16)",
+        "purpose": "Popovers (tray, Keys) and the Move-to menu."
+      },
+      {
+        "name": "toast",
+        "value": "0 8px 24px rgba(22,24,27,.25)",
+        "purpose": "The undo toast."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fade",
+        "value": "background-color .15s ease-out, opacity .15s ease-out",
+        "purpose": "Row, chip, and action state changes; only under prefers-reduced-motion: no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "module-column",
+        "value": "460px",
+        "purpose": "CSS column width for window modules; no mobile breakpoints."
+      }
+    ],
+    "focus": {
+      "value": "2px solid #16181b, offset 1px",
+      "purpose": "Global focus-visible ring."
+    },
+    "browserSurfaces": {
+      "scrollbar": "#8a919b on #f3f4f6",
+      "selection": "#d7000f with white text",
+      "caret": "#d7000f"
+    }
+  },
+  "components": [
+    {
+      "name": "Window Letter Tab",
+      "kind": "custom",
+      "refersTo": "window-tab",
+      "description": "Names a window everywhere: module header, chip, Move-to menu, tray.",
+      "html": "<span class=\"ds-tab\">A</span>",
+      "css": ".ds-tab{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:28px;padding:0 6px;background:#d7000f;color:#fff;font:700 12px/1 \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;letter-spacing:.02em}"
+    },
+    {
+      "name": "Window Module",
+      "kind": "card",
+      "refersTo": "window-header",
+      "description": "Ruled module with gray header band and one-line rows.",
+      "html": "<section class=\"ds-mod\"><h2 class=\"ds-mod-h\"><span class=\"ds-tab\">A</span>Window A <span class=\"ds-count\">3 tabs</span><span class=\"ds-doms\">github.com, docs.python.org</span></h2><ul class=\"ds-rows\"><li>Pull requests - jungerland/tab-rehab<span>github.com</span></li><li>http.server: HTTP servers<span>docs.python.org</span></li><li>Settings<span>settings</span></li></ul></section>",
+      "css": ".ds-mod{width:460px;border:1px solid #d5d9de;background:#fff;font:12px/1.4 \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;color:#16181b;font-variant-numeric:tabular-nums}.ds-mod-h{display:flex;align-items:center;gap:8px;margin:0;height:28px;padding:0 8px 0 0;font-size:12px;font-weight:700;border-bottom:1px solid #8a919b;background:#f3f4f6}.ds-tab{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:100%;padding:0 6px;background:#d7000f;color:#fff;font-weight:700}.ds-count{font-weight:400;color:#4a5059}.ds-doms{margin-left:auto;font-weight:400;color:#5f6670}.ds-rows{list-style:none;margin:0;padding:0}.ds-rows li{display:flex;justify-content:space-between;align-items:center;height:30px;padding:0 8px;border-bottom:1px solid #eceef1;font-size:12.5px}.ds-rows li:last-child{border-bottom:0}.ds-rows li:hover{background:#f7f8fa}.ds-rows li span{font-size:11px;color:#5f6670}"
+    },
+    {
+      "name": "Purge Button",
+      "kind": "button",
+      "refersTo": "button-purge",
+      "description": "The only filled red button; used for closing tabs.",
+      "html": "<button class=\"ds-purge\">Close 12 selected</button>",
+      "css": ".ds-purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:#d7000f;color:#fff;font:700 12px \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;cursor:pointer;transition:background-color .15s ease-out}.ds-purge:hover{background:#b5000c}.ds-purge:focus-visible{outline:2px solid #16181b;outline-offset:1px}"
+    },
+    {
+      "name": "Bar Control",
+      "kind": "button",
+      "description": "Secondary control in the sticky bar (Keys, recently closed).",
+      "html": "<button class=\"ds-ctl\">Keys</button>",
+      "css": ".ds-ctl{height:28px;padding:0 8px;border:1px solid #8a919b;border-radius:2px;background:#fff;color:#16181b;font:600 12px \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;cursor:pointer}.ds-ctl:hover{border-color:#16181b}.ds-ctl:focus-visible{outline:2px solid #16181b;outline-offset:1px}"
+    },
+    {
+      "name": "Window Chip",
+      "kind": "chip",
+      "refersTo": "window-chip",
+      "description": "Jump target and drop target for a window in the sticky bar.",
+      "html": "<button class=\"ds-chip\"><span class=\"ds-chip-tab\">B</span><span class=\"ds-n\">9</span></button>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 0;border:1px solid #8a919b;border-radius:2px;background:#fff;color:#16181b;font:12px \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;cursor:pointer;font-variant-numeric:tabular-nums}.ds-chip:hover{border-color:#16181b}.ds-chip:focus-visible{outline:2px solid #16181b;outline-offset:-1px;background:#f3f4f6}.ds-chip-tab{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:100%;background:#d7000f;color:#fff;font-weight:700}.ds-n{font-weight:700}"
+    },
+    {
+      "name": "Filter Input",
+      "kind": "input",
+      "refersTo": "input-filter",
+      "description": "Labeled filter field in the sticky bar.",
+      "html": "<label class=\"ds-lbl\">Filter <input class=\"ds-input\" placeholder=\"Title or URL\"></label>",
+      "css": ".ds-lbl{font:600 12px \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;color:#4a5059;display:inline-flex;gap:8px;align-items:center}.ds-input{width:280px;height:28px;padding:0 8px;font:13px \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;color:#16181b;background:#fff;border:1px solid #8a919b;border-radius:2px;caret-color:#d7000f}.ds-input::placeholder{color:#5f6670}.ds-input:focus-visible{outline:2px solid #16181b;outline-offset:1px}"
+    },
+    {
+      "name": "Quiet Trash",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "Pewter at rest, red when its row is active, filled red on direct hover.",
+      "html": "<button class=\"ds-del\" aria-label=\"Close tab\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 6h18\"/><path d=\"M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6\"/><path d=\"M10 11v6M14 11v6\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/></svg></button>",
+      "css": ".ds-del{width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;background:transparent;color:#5f6670;cursor:pointer;transition:background-color .15s ease-out}.ds-del:focus-visible{color:#b5000c;outline:2px solid #16181b;outline-offset:1px}.ds-del:hover{background:#d7000f;color:#fff}"
+    },
+    {
+      "name": "Undo Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Bottom-left status with an Undo action.",
+      "html": "<div class=\"ds-toast\">Closed 12 tabs <button class=\"ds-undo\">Undo</button></div>",
+      "css": ".ds-toast{display:inline-flex;align-items:center;gap:10px;padding:10px 12px;background:#16181b;color:#fff;border-radius:2px;box-shadow:0 8px 24px rgba(22,24,27,.25);font:12px \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif}.ds-undo{border:0;background:none;padding:0 4px;height:24px;font:700 12px \"Hiragino Sans\",\"Hiragino Kaku Gothic ProN\",\"Segoe UI\",\"Noto Sans\",system-ui,sans-serif;color:#fff;cursor:pointer;text-decoration:underline;text-underline-offset:2px}.ds-undo:focus-visible{outline:2px solid #fff;outline-offset:1px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Departure Board",
+    "overview": "Tab Rehab borrows the grammar of a Japanese high-density portal: white ground, near-black ink, cool gray hairlines and panel fills, and one utility red. The page exists so a 100-tab purge reads as one scan, so density is the feature. Rows are one line and 30px tall, window modules pack into columns, and every pixel of chrome either names a window, counts something, or closes something.\n\nThe system is flat and ruled. Structure comes from hairlines, a 2px ink rule under the sticky bar, and gray header bands, not from cards or shadows. Red carries meaning, never decoration: a window's letter tab, and the act of purging. Everything else is ink on white at three steps of gray.\n\nDesktop only. There are no mobile layouts and none should be designed.",
+    "keyCharacteristics": [
+      "One-line, fixed-height rows (30px) with ellipsis, never wrapping.",
+      "A red letter tab (A, B, C...) names each window everywhere it appears.",
+      "Hairline rules and gray bands instead of shadows or rounded cards.",
+      "Near-square corners (2px) throughout.",
+      "Tabular numerals everywhere, since counts are the main data."
+    ],
+    "rules": [
+      {
+        "name": "The Two Meanings Rule",
+        "body": "Red means a window's identity or the act of purging. It is not used for hover, drop targets, menu highlight, or emphasis. Drop targets and menu hover use an ink outline on Panel Gray instead.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Trash Rule",
+        "body": "The trash icon rests in Pewter. It turns red only when its row is hovered, focused, or selected, and fills red on direct hover. At 100 tabs, 100 red icons would drown the window tabs.",
+        "section": "colors"
+      },
+      {
+        "name": "The Weight Not Size Rule",
+        "body": "The ramp spans 11 to 19px. New hierarchy is made with weight (400, 600, 700) and color (Ink, Slate, Pewter), not by adding sizes.",
+        "section": "typography"
+      },
+      {
+        "name": "The Counted Rule",
+        "body": "Tabular numerals stay on page-wide. Counts are the data.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only-What-Floats Rule",
+        "body": "If it sits in the page flow, it has no shadow. Only popovers, menus, and the toast lift.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use the red letter tab whenever a window is named, on any surface.",
+      "Do keep rows one line at 30px and truncate with ellipsis.",
+      "Do show drop targets and menu highlight with a 2px Ink outline on Panel Gray.",
+      "Do theme browser surfaces from the palette: scrollbars in Strong Rule on Panel Gray, red selection and caret, Ink focus outlines.",
+      "Do keep row actions as overlays so revealing them never shifts the row."
+    ],
+    "donts": [
+      "Don't use red for hover, emphasis, drop targets, or decoration (The Two Meanings Rule).",
+      "Don't give in-flow elements shadows or rounded card corners above 2px.",
+      "Don't add type sizes to create hierarchy; use weight and the three grays.",
+      "Don't design mobile layouts."
+    ],
+    "open": [
+      "Display face: a self-hosted condensed face, deferred because it means shipping a font file in a single-file tool.",
+      "DIN-style numerals for counts and chips.",
+      "Tag badges on rows."
+    ]
+  }
+}
