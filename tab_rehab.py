@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chrome Tab Sludge-Away: local page listing Chrome tabs, with close and drag-to-move between windows.
+"""Tab Rehab: local page listing Chrome tabs, with close and drag-to-move between windows.
 Run, then open http://127.0.0.1:8765"""
 import html
 import json
@@ -113,7 +113,7 @@ def render(tabs):
             f'<section data-w="{w}" ondragover="dragOver(event)" ondragleave="this.classList.remove(\'over\')" ondrop="drop(event)">'
             f'<h2>Window {n} <span class="count">({len(wtabs)} tabs)</span></h2><ul>{"".join(rows)}</ul></section>'
         )
-    return f'''<!DOCTYPE html><html><head><meta charset="utf-8"><title>Chrome Tab Sludge-Away</title>
+    return f'''<!DOCTYPE html><html><head><meta charset="utf-8"><title>Tab Rehab</title>
 <style>
 body{{font:14px -apple-system,system-ui,sans-serif;margin:24px auto;max-width:1000px;color:#222;padding:0 16px}}
 h1{{margin:0 0 8px}} h2{{font-size:15px;margin:20px 0 6px;color:#555}} .count{{font-weight:normal}}
@@ -134,7 +134,7 @@ li.moving{{opacity:.4}}
 .grip{{flex:none;cursor:grab;padding:3px 4px 0;color:#bbb;letter-spacing:-3px;user-select:none}}
 .hint{{color:#888;margin:0 0 8px}}
 </style></head><body>
-<h1>Chrome Tab Sludge-Away</h1>
+<h1>Tab Rehab</h1>
 <p class="hint">Drag a tab by its grip (&#8942;&#8942;) onto another window to move it there (it lands at the end of that window).</p>
 <div id="bar"><input id="q" placeholder="Filter by title or URL" oninput="filter()"><span id="total">{len(tabs)} tabs</span>
 <a href="/">Refresh</a></div>
