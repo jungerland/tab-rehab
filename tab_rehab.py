@@ -62,7 +62,7 @@ def list_tabs():
 
 
 def _svg(body):
-    return ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+    return ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
             f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{body}</svg>')
 
 
@@ -158,7 +158,7 @@ CSS = '''
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html{color-scheme:light}
+html{color-scheme:light;scrollbar-color:var(--rule-strong) var(--panel)}
 body{margin:0;background:var(--ground);color:var(--ink);
   font:12px/1.4 "Hiragino Sans","Hiragino Kaku Gothic ProN","Segoe UI","Noto Sans",system-ui,sans-serif;
   font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
@@ -167,13 +167,13 @@ a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 input[type=checkbox]{accent-color:var(--red);width:14px;height:14px;margin:0;cursor:pointer}
 header{display:flex;align-items:baseline;gap:12px;padding:14px 16px 10px}
-h1{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:0}
+h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
 #total{color:var(--ink-2);font-size:12px}
 #bar{position:sticky;top:0;z-index:3;background:var(--panel);border-top:1px solid var(--rule);
-  border-bottom:1px solid var(--rule-strong);padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+  border-bottom:2px solid var(--ink);padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
 #bar label{font-weight:600;color:var(--ink-2)}
 #q{width:280px;height:28px;padding:0 8px;font:inherit;font-size:13px;color:var(--ink);background:#fff;
-  border:1px solid var(--rule-strong);border-radius:2px}
+  border:1px solid var(--rule-strong);border-radius:2px;caret-color:var(--red)}
 #q::placeholder{color:var(--ink-3)}
 #shown{color:var(--ink-2)}
 .purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:var(--red);color:#fff;font:inherit;font-weight:700;cursor:pointer}
@@ -184,32 +184,37 @@ h1{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:0}
   border-radius:2px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
 .chip .tab{height:100%;border-radius:1px 0 0 1px}
 .chip:hover{border-color:var(--ink)}
-.chip.over,section.over{outline:2px solid var(--red);outline-offset:-1px;background:var(--red-wash)}
-#tray{position:relative}
-#tray summary{cursor:pointer;color:var(--ink);font-weight:600;list-style:none;height:28px;display:flex;align-items:center;
+.chip .n{font-weight:700}
+.chip.over,section.over{outline:2px solid var(--ink);outline-offset:-1px;background:var(--panel)}
+#tray,#keys{position:relative}
+#tray summary,#keys summary{cursor:pointer;color:var(--ink);font-weight:600;list-style:none;height:28px;display:flex;align-items:center;
   padding:0 8px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
-#tray summary::-webkit-details-marker{display:none}
-#tray[open] summary{border-color:var(--ink)}
-#tray ol{position:absolute;right:0;top:32px;width:420px;max-height:60vh;overflow:auto;margin:0;padding:0;list-style:none;
-  background:#fff;border:1px solid var(--rule-strong);box-shadow:0 6px 18px rgba(22,24,27,.14)}
-#tray li{grid-template-columns:24px minmax(0,1fr) auto;padding:0 6px}
-#tray .note{padding:6px 8px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
+#tray summary::-webkit-details-marker,#keys summary::-webkit-details-marker{display:none}
+#tray[open] summary,#keys[open] summary{border-color:var(--ink)}
+.pop{position:absolute;right:0;top:32px;width:440px;background:#fff;border:1px solid var(--rule-strong);box-shadow:0 2px 6px rgba(22,24,27,.16)}
+.pop ol{max-height:60vh;overflow:auto;margin:0;padding:0;list-style:none}
+#tray li{grid-template-columns:26px 18px minmax(0,1fr) auto;padding:0 6px 0 0}
+#tray li .tab{height:100%}
+.note{margin:0;padding:6px 8px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
+#keys .pop{width:300px;padding:6px 10px}
+#keys dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:0}
+#keys dd{margin:0;color:var(--ink-2)}
 .linkbtn{border:0;background:none;padding:0 4px;height:24px;font:inherit;font-weight:700;color:var(--red-ink);cursor:pointer;
   text-decoration:underline;text-underline-offset:2px}
 #refresh{font-weight:600;color:var(--ink);border-bottom:1px solid var(--rule-strong)}
 #refresh:hover{border-color:var(--ink)}
 .hint{margin:0;padding:6px 16px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
-main{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:10px;padding:10px 16px 80px;align-items:start}
-section{border:1px solid var(--rule);background:#fff;min-width:0}
-section h2{display:flex;align-items:center;gap:8px;margin:0;height:28px;padding:0 8px 0 0;font-size:12px;font-weight:600;
-  border-bottom:1px solid var(--rule);background:var(--panel)}
+main{column-width:460px;column-gap:10px;padding:10px 16px 80px}
+section{border:1px solid var(--rule);background:#fff;min-width:0;break-inside:avoid;margin:0 0 10px}
+section h2{display:flex;align-items:center;gap:8px;margin:0;height:28px;padding:0 8px 0 0;font-size:12px;font-weight:700;
+  border-bottom:1px solid var(--rule-strong);background:var(--panel)}
 .tab{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:100%;padding:0 6px;
   background:var(--red);color:#fff;font-weight:700;letter-spacing:.02em}
 section h2 .count{font-weight:400;color:var(--ink-2)}
 section h2 .doms{margin-left:auto;font-weight:400;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 ul{list-style:none;margin:0;padding:0}
-li{display:grid;grid-template-columns:22px 14px 18px minmax(0,1fr) auto auto;align-items:center;gap:6px;
-  height:var(--row);padding:0 4px 0 6px;border-bottom:1px solid #eceef1}
+li{position:relative;display:grid;grid-template-columns:22px 14px 18px minmax(0,1fr) auto 24px;align-items:center;gap:6px;
+  height:var(--row);padding:0 4px 0 6px;border-bottom:1px solid #eceef1;background:#fff}
 li:last-child{border-bottom:0}
 li:hover,li:focus-within{background:#f7f8fa}
 li.sel{background:var(--red-wash)}
@@ -222,29 +227,29 @@ li.moving,li.busy{opacity:.45}
 a.title:hover{text-decoration:underline;text-underline-offset:2px}
 .host{max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-3);font-size:11px;text-align:right}
 .host.err{max-width:320px;color:var(--red-ink);font-weight:600}
-.acts{display:flex;gap:2px}
-.acts button{width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;
+.more{position:absolute;right:32px;top:3px;display:flex;gap:2px;padding-left:6px;background:inherit;opacity:0}
+li:hover .more,li:focus-within .more{opacity:1}
+.more button,.del{width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;
   background:transparent;color:var(--ink-3);cursor:pointer;font:inherit;font-size:10px}
-.acts button:hover{background:#e6e8eb;color:var(--ink)}
-.acts .soft{opacity:0}
-li:hover .soft,li:focus-within .soft{opacity:1}
-.acts .del{color:var(--red-ink)}
-.acts .del:hover{background:var(--red);color:#fff}
-.acts svg{width:15px;height:15px}
+.more button:hover{background:#e6e8eb;color:var(--ink)}
+.del{color:var(--ink-3)}
+li:hover .del,li:focus-within .del,li.sel .del{color:var(--red-ink)}
+li .del:hover{background:var(--red);color:#fff}
+.more svg,.del svg{width:15px;height:15px}
 #toast{position:fixed;left:16px;bottom:16px;z-index:4;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);
   padding:10px 12px;background:var(--ink);color:#fff;border-radius:2px;box-shadow:0 8px 24px rgba(22,24,27,.25)}
 #toast .linkbtn{color:#fff}
 #toast small{color:#c9cdd3}
 #menu{position:fixed;z-index:5;width:240px;padding:4px 0;background:#fff;border:1px solid var(--rule-strong);
-  box-shadow:0 6px 18px rgba(22,24,27,.16)}
+  box-shadow:0 2px 6px rgba(22,24,27,.16)}
 #menu button{display:flex;align-items:center;gap:8px;width:100%;height:30px;padding:0 8px 0 0;border:0;background:none;
   font:inherit;color:var(--ink);text-align:left;cursor:pointer}
-#menu button:hover,#menu button:focus-visible{background:var(--red-wash);outline:0}
+#menu button:hover,#menu button:focus-visible{background:var(--panel);outline:2px solid var(--ink);outline-offset:-2px}
 #menu .note{margin:0;padding:6px 10px;color:var(--ink-2)}
 kbd{font:inherit;font-size:11px;padding:0 4px;margin:0 1px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff;color:var(--ink)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .empty{padding:40px 16px;color:var(--ink-2);font-size:13px}
-@media (prefers-reduced-motion:no-preference){li,.chip,.acts button{transition:background-color .15s ease-out,opacity .15s ease-out}}
+@media (prefers-reduced-motion:no-preference){li,.chip,.more,.more button,.del{transition:background-color .15s ease-out,opacity .15s ease-out}}
 '''
 
 JS = '''
@@ -313,14 +318,15 @@ async function closeRows(lis) {
     li.classList.remove('busy');
     if (failed.has(li.dataset.w + ':' + li.dataset.t)) { rowError(li, "Couldn't close. Refresh the page."); return; }
     setSel(li, false);
-    done.push({li, w: +li.dataset.w, url: li.dataset.url, title: li.querySelector('.title').textContent});
+    done.push({li, w: +li.dataset.w, code: li.closest('section').dataset.code, url: li.dataset.url, title: li.querySelector('.title').textContent});
     li.remove();
   });
   if (!done.length) return;
   closed.push(...done);
   updateCounts(); renderTray();
   if (hadFocus) focusRow(next && !next.hidden ? next : null);
-  toast('Closed ' + plural(done.length, 'tab') + '.', () => reopen(done));
+  const codes = [...new Set(done.map(d => d.code))];
+  toast('Closed ' + plural(done.length, 'tab') + (codes.length === 1 ? ' from window ' + codes[0] : '') + '.', () => reopen(done));
 }
 function closeTab(btn) { return closeRows([btn.closest('li')]); }
 function closeSelected() { return closeRows(rows().filter(li => li.classList.contains('sel') && !li.hidden)); }
@@ -343,10 +349,11 @@ function renderTray() {
   tray.hidden = !closed.length;
   tray.querySelector('summary').textContent = 'Recently closed (' + closed.length + ')';
   const ol = tray.querySelector('ol');
-  ol.innerHTML = '<p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p>';
+  ol.innerHTML = '';
   closed.slice().reverse().forEach(e => {
     const li = document.createElement('li');
-    li.innerHTML = '<span class="mono"></span><span class="title"></span><button class="linkbtn">Reopen</button>';
+    li.innerHTML = '<span class="tab"></span><span class="mono"></span><span class="title"></span><button class="linkbtn">Reopen</button>';
+    li.querySelector('.tab').textContent = e.code;
     const m = e.li.querySelector('.mono');
     li.querySelector('.mono').replaceWith(m.cloneNode(true));
     li.querySelector('.title').textContent = e.title;
@@ -435,7 +442,7 @@ function openMove(btn) {
   const li = btn.closest('li'), m = $('#menu');
   m.innerHTML = '';
   const targets = $$('main section').filter(s => s.dataset.w !== li.dataset.w && s.querySelector('li'));
-  if (!targets.length) m.innerHTML = '<p class="note">No other windows. Open one in Chrome, then refresh.</p>';
+  m.innerHTML = '<p class="note">' + (targets.length ? 'Moving reloads the page. Back/forward history is lost.' : 'No other windows. Open one in Chrome, then refresh.') + '</p>';
   targets.forEach(s => {
     const b = document.createElement('button');
     b.setAttribute('role', 'menuitem');
@@ -587,13 +594,12 @@ def render(tabs):
                 f'<span class="mono" style="background:hsl({hue} 55% 91%);color:hsl({hue} 60% 26%)" aria-hidden="true">'
                 f'{html.escape(host[:1] or "?")}</span>'
                 f'{title_el}<span class="host">{html.escape(host)}</span>'
-                f'<span class="acts">'
-                f'<button class="soft vw" onclick="viewTab(this)" title="Switch to this tab in Chrome" aria-label="View in Chrome: {title}">{ICONS["view"]}</button>'
-                f'<button class="soft cp" onclick="copyUrl(this)" title="Copy URL" aria-label="Copy URL: {title}">{ICONS["copy"]}</button>'
-                f'<button class="soft mv" onclick="openMove(this)" title="Move to another window (M)" aria-haspopup="menu" aria-expanded="false" '
+                f'<span class="more">'
+                f'<button class="vw" onclick="viewTab(this)" title="Switch to this tab in Chrome" aria-label="View in Chrome: {title}">{ICONS["view"]}</button>'
+                f'<button class="cp" onclick="copyUrl(this)" title="Copy URL" aria-label="Copy URL: {title}">{ICONS["copy"]}</button>'
+                f'<button class="mv" onclick="openMove(this)" title="Move to another window (M)" aria-haspopup="menu" aria-expanded="false" '
                 f'aria-label="Move to window: {title}">{ICONS["move"]}</button>'
-                f'<button class="del" onclick="closeTab(this)" title="Close tab (Delete)" aria-label="Close: {title}">{ICONS["trash"]}</button>'
-                f'</span></li>'
+                f'</span><button class="del" onclick="closeTab(this)" title="Close tab (Delete)" aria-label="Close: {title}">{ICONS["trash"]}</button></li>'
             )
         doms = ", ".join(h for h, _ in Counter(host_of(t["url"]) for t in wtabs).most_common(2))
         drop = 'ondragover="dragOver(event)" ondragleave="this.classList.remove(\'over\')" ondrop="drop(event)"'
@@ -615,11 +621,9 @@ def render(tabs):
 <span id="shown"></span><button id="closeSel" class="purge" onclick="closeSelected()" hidden></button>
 <button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
 <div id="chips">{"".join(chips)}</div>
-<details id="tray" hidden><summary></summary><ol></ol></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
-<p class="hint">Check tabs to close them together (shift-click selects a range). Drag a tab by its grip onto a window or a window chip to move it.
-Moving reopens the page there, so its back/forward history is lost.<br>
-Keys: <kbd>/</kbd> filter, <kbd>&uarr;</kbd><kbd>&darr;</kbd> or <kbd>j</kbd><kbd>k</kbd> move between tabs, <kbd>x</kbd> select,
-<kbd>Delete</kbd> close, <kbd>m</kbd> move to window, <kbd>Esc</kbd> clear filter.</p>
+<details id="tray" hidden><summary></summary><div class="pop"><p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p><ol></ol></div></details>
+<details id="keys"><summary>Keys</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
+<p class="hint">Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move a tab; its back/forward history is lost.</p>
 <main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
 <div id="toast" role="status" hidden></div><div id="live" class="sr-only" aria-live="polite"></div>
 <script>{JS.replace("__TOKEN__", json.dumps(TOKEN))}</script></body></html>'''
