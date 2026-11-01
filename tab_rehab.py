@@ -179,8 +179,8 @@ h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
 .purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:var(--red);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 .purge:hover{background:var(--red-ink)}
 .purge:disabled{opacity:.6;cursor:progress}
-#chips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
-.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 0;border:1px solid var(--rule-strong);
+#chips{display:flex;gap:6px;flex:1;min-width:120px;overflow-x:auto;scrollbar-width:thin}
+.chip{flex:none;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 0;border:1px solid var(--rule-strong);
   border-radius:2px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
 .chip .tab{height:100%;border-radius:1px 0 0 1px}
 .chip:hover{border-color:var(--ink)}
@@ -545,6 +545,9 @@ function filter() {
     s.hidden = !any;
   });
   $('#shown').textContent = q ? shown + ' of ' + plural(rows().length, 'tab') : '';
+  const none = $('#none');
+  none.hidden = shown > 0;
+  none.textContent = rows().length ? 'No tabs match "' + $('#q').value.trim() + '". Press Esc to clear the filter.' : 'No tabs left. Open some in Chrome, then refresh.';
   updateBar();
 }
 function refresh(a) {
@@ -624,7 +627,7 @@ def render(tabs):
 <details id="tray" hidden><summary></summary><div class="pop"><p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p><ol></ol></div></details>
 <details id="keys"><summary>Keys</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
 <p class="hint">Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move a tab; its back/forward history is lost.</p>
-<main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
+<p id="none" class="empty" hidden></p><main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
 <div id="toast" role="status" hidden></div><div id="live" class="sr-only" aria-live="polite"></div>
 <script>{JS.replace("__TOKEN__", json.dumps(TOKEN))}</script></body></html>'''
 
