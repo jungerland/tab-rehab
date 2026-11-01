@@ -71,6 +71,7 @@ ICONS = {
     "copy": _svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
     "trash": _svg('<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>'
                   '<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>'),
+    "move": _svg('<path d="M16 3l4 4-4 4"/><path d="M20 7H4"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h16"/>'),
     "grip": ('<svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true">'
              '<circle cx="3" cy="3" r="1.4"/><circle cx="7" cy="3" r="1.4"/><circle cx="3" cy="8" r="1.4"/>'
              '<circle cx="7" cy="8" r="1.4"/><circle cx="3" cy="13" r="1.4"/><circle cx="7" cy="13" r="1.4"/></svg>'),
@@ -234,6 +235,14 @@ li:hover .soft,li:focus-within .soft{opacity:1}
   padding:10px 12px;background:var(--ink);color:#fff;border-radius:2px;box-shadow:0 8px 24px rgba(22,24,27,.25)}
 #toast .linkbtn{color:#fff}
 #toast small{color:#c9cdd3}
+#menu{position:fixed;z-index:5;width:240px;padding:4px 0;background:#fff;border:1px solid var(--rule-strong);
+  box-shadow:0 6px 18px rgba(22,24,27,.16)}
+#menu button{display:flex;align-items:center;gap:8px;width:100%;height:30px;padding:0 8px 0 0;border:0;background:none;
+  font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+#menu button:hover,#menu button:focus-visible{background:var(--red-wash);outline:0}
+#menu .note{margin:0;padding:6px 10px;color:var(--ink-2)}
+kbd{font:inherit;font-size:11px;padding:0 4px;margin:0 1px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff;color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .empty{padding:40px 16px;color:var(--ink-2);font-size:13px}
 @media (prefers-reduced-motion:no-preference){li,.chip,.acts button{transition:background-color .15s ease-out,opacity .15s ease-out}}
 '''
@@ -252,7 +261,20 @@ async function call(path, body) {
     return {ok: false, error: 'Tab Rehab server is not running. Restart it and refresh.'};
   }
 }
+function announce(msg) { const l = $('#live'); l.textContent = ''; setTimeout(() => l.textContent = msg, 30); }
+const visible = () => rows().filter(li => !li.hidden);
+function neighbor(lis) {
+  // The row the keyboard should land on after these rows leave: the next visible one, else the previous.
+  const vis = visible(), gone = new Set(lis);
+  const last = Math.max(...lis.map(li => vis.indexOf(li)));
+  return vis.slice(last + 1).find(li => !gone.has(li)) || vis.slice(0, last).reverse().find(li => !gone.has(li)) || null;
+}
+function focusRow(li, sel) {
+  if (!li) { $('#q').focus(); return; }
+  (li.querySelector(sel || '.del') || li.querySelector('.del')).focus({preventScroll: false});
+}
 function rowError(li, msg) {
+  announce(msg);
   const h = li.querySelector('.host');
   if (!h.dataset.text) h.dataset.text = h.textContent;
   h.textContent = msg; h.title = msg; h.classList.add('err');
@@ -270,7 +292,7 @@ async function viewTab(btn) {
   if (!r.ok) rowError(li, r.error);
 }
 async function copyUrl(btn) {
-  try { await navigator.clipboard.writeText(btn.closest('li').dataset.url); flash(btn, 'Copied'); }
+  try { await navigator.clipboard.writeText(btn.closest('li').dataset.url); flash(btn, 'Copied'); announce('URL copied.'); }
   catch (e) { rowError(btn.closest('li'), 'Copy blocked by the browser.'); }
 }
 
@@ -283,6 +305,8 @@ async function closeRows(lis) {
     ? await call('/close', {w: +lis[0].dataset.w, t: +lis[0].dataset.t})
     : await call('/close-many', {tabs: lis.map(li => ({w: +li.dataset.w, t: +li.dataset.t}))});
   if (!r.ok) { lis.forEach(li => { li.classList.remove('busy'); rowError(li, r.error); }); return; }
+  const hadFocus = lis.some(li => li.contains(document.activeElement)) || document.activeElement.classList.contains('purge');
+  const next = neighbor(lis);
   const failed = new Set(r.data.failed || []);
   const done = [];
   lis.forEach(li => {
@@ -295,6 +319,7 @@ async function closeRows(lis) {
   if (!done.length) return;
   closed.push(...done);
   updateCounts(); renderTray();
+  if (hadFocus) focusRow(next && !next.hidden ? next : null);
   toast('Closed ' + plural(done.length, 'tab') + '.', () => reopen(done));
 }
 function closeTab(btn) { return closeRows([btn.closest('li')]); }
@@ -395,11 +420,90 @@ async function moveRow(li, w) {
   li.classList.add('busy');
   const r = await call('/move', {w: +li.dataset.w, t: +li.dataset.t, to: +w});
   li.classList.remove('busy');
-  if (!r.ok) { rowError(li, 'Move failed: ' + r.error); return; }
+  if (!r.ok) { rowError(li, 'Move failed: ' + r.error); return false; }
   li.dataset.w = w; li.dataset.t = r.data.t;
-  $('section[data-w="' + w + '"] ul').appendChild(li);
+  const sec = $('section[data-w="' + w + '"]');
+  sec.querySelector('ul').appendChild(li);
   updateCounts();
+  announce('Moved to window ' + sec.dataset.code + '.');
+  return true;
 }
+
+/* Keyboard move menu */
+let menuFor = null;
+function openMove(btn) {
+  const li = btn.closest('li'), m = $('#menu');
+  m.innerHTML = '';
+  const targets = $$('main section').filter(s => s.dataset.w !== li.dataset.w && s.querySelector('li'));
+  if (!targets.length) m.innerHTML = '<p class="note">No other windows. Open one in Chrome, then refresh.</p>';
+  targets.forEach(s => {
+    const b = document.createElement('button');
+    b.setAttribute('role', 'menuitem');
+    b.innerHTML = '<span class="tab"></span><span></span>';
+    b.firstChild.textContent = s.dataset.code;
+    b.lastChild.textContent = 'Window ' + s.dataset.code + ', ' + s.querySelector('.count').textContent;
+    b.onclick = async () => {
+      const next = neighbor([li]);
+      closeMenu(false);
+      if (await moveRow(li, s.dataset.w)) focusRow(next, '.mv'); else focusRow(li, '.mv');
+    };
+    m.appendChild(b);
+  });
+  const r = btn.getBoundingClientRect();
+  m.style.top = Math.min(r.bottom + 4, innerHeight - 40 - 30 * targets.length) + 'px';
+  m.style.left = Math.max(8, r.right - 240) + 'px';
+  m.hidden = false; menuFor = btn;
+  btn.setAttribute('aria-expanded', 'true');
+  (m.querySelector('button') || m).focus();
+}
+function closeMenu(refocus) {
+  const m = $('#menu');
+  if (m.hidden) return;
+  m.hidden = true;
+  if (menuFor) { menuFor.setAttribute('aria-expanded', 'false'); if (refocus !== false) menuFor.focus(); }
+  menuFor = null;
+}
+document.addEventListener('mousedown', e => { if (!e.target.closest('#menu, .mv')) closeMenu(false); });
+addEventListener('scroll', () => closeMenu(false), {passive: true});
+
+/* Shortcuts */
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const a = document.activeElement, inMenu = a && a.closest && a.closest('#menu');
+  if (inMenu) {
+    const items = $$('#menu button'), i = items.indexOf(a);
+    if (e.key === 'Escape') { e.preventDefault(); closeMenu(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    return;
+  }
+  if (a && a.id === 'q') {
+    if (e.key === 'Escape') { a.value = ''; filter(); a.blur(); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusRow(visible()[0], '.pick'); }
+    return;
+  }
+  const li = a && a.closest && a.closest('main li');
+  if (e.key === '/') { e.preventDefault(); $('#q').focus(); $('#q').select(); return; }
+  if (!li) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'j' || e.key === 'k') {
+    e.preventDefault();
+    const vis = visible(), i = vis.indexOf(li) + (e.key === 'ArrowDown' || e.key === 'j' ? 1 : -1);
+    if (vis[i]) {
+      const cls = [...a.classList].find(c => ['pick', 'title', 'vw', 'cp', 'mv', 'del'].includes(c)) || 'pick';
+      focusRow(vis[i], '.' + cls);
+    }
+  } else if (e.key === 'x' || (e.key === ' ' && !a.matches('button, input'))) {
+    e.preventDefault();
+    const box = li.querySelector('.pick');
+    box.checked = !box.checked; setSel(li, box.checked); lastPick = li; updateBar();
+  } else if (e.key === 'Delete' || e.key === 'Backspace') {
+    e.preventDefault();
+    const sel = visible().filter(r => r.classList.contains('sel'));
+    closeRows(sel.length ? sel : [li]);
+  } else if (e.key === 'm') {
+    e.preventDefault(); openMove(li.querySelector('.mv'));
+  }
+});
 function drop(e) {
   e.preventDefault();
   const w = e.currentTarget.dataset.w, li = dragged;
@@ -436,6 +540,14 @@ function filter() {
   $('#shown').textContent = q ? shown + ' of ' + plural(rows().length, 'tab') : '';
   updateBar();
 }
+function refresh(a) {
+  const q = $('#q').value.trim();
+  a.href = q ? '/?q=' + encodeURIComponent(q) : '/';
+}
+(() => {
+  const q = new URLSearchParams(location.search).get('q');
+  if (q) { $('#q').value = q; filter(); }
+})();
 '''
 
 ERROR_PAGE = '''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Tab Rehab</title>
@@ -469,22 +581,24 @@ def render(tabs):
             find = html.escape(f'{tab["title"]} {tab["url"]}'.lower())
             rows.append(
                 f'<li data-w="{w}" data-t="{tab["t"]}" data-url="{url}" data-find="{find}">'
-                f'<input type="checkbox" class="pick" onclick="pick(event)" aria-label="Select tab">'
+                f'<input type="checkbox" class="pick" onclick="pick(event)" aria-label="Select: {title}">'
                 f'<span class="grip" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd()" '
-                f'title="Drag onto another window">{ICONS["grip"]}</span>'
+                f'title="Drag onto another window" aria-hidden="true">{ICONS["grip"]}</span>'
                 f'<span class="mono" style="background:hsl({hue} 55% 91%);color:hsl({hue} 60% 26%)" aria-hidden="true">'
                 f'{html.escape(host[:1] or "?")}</span>'
                 f'{title_el}<span class="host">{html.escape(host)}</span>'
                 f'<span class="acts">'
-                f'<button class="soft" onclick="viewTab(this)" title="Switch to this tab in Chrome" aria-label="View tab">{ICONS["view"]}</button>'
-                f'<button class="soft" onclick="copyUrl(this)" title="Copy URL" aria-label="Copy URL">{ICONS["copy"]}</button>'
-                f'<button class="del" onclick="closeTab(this)" title="Close tab" aria-label="Close tab">{ICONS["trash"]}</button>'
+                f'<button class="soft vw" onclick="viewTab(this)" title="Switch to this tab in Chrome" aria-label="View in Chrome: {title}">{ICONS["view"]}</button>'
+                f'<button class="soft cp" onclick="copyUrl(this)" title="Copy URL" aria-label="Copy URL: {title}">{ICONS["copy"]}</button>'
+                f'<button class="soft mv" onclick="openMove(this)" title="Move to another window (M)" aria-haspopup="menu" aria-expanded="false" '
+                f'aria-label="Move to window: {title}">{ICONS["move"]}</button>'
+                f'<button class="del" onclick="closeTab(this)" title="Close tab (Delete)" aria-label="Close: {title}">{ICONS["trash"]}</button>'
                 f'</span></li>'
             )
         doms = ", ".join(h for h, _ in Counter(host_of(t["url"]) for t in wtabs).most_common(2))
         drop = 'ondragover="dragOver(event)" ondragleave="this.classList.remove(\'over\')" ondrop="drop(event)"'
         sections.append(
-            f'<section data-w="{w}" {drop}>'
+            f'<section data-w="{w}" data-code="{code}" aria-label="Window {code}" {drop}>'
             f'<h2><span class="tab">{code}</span>Window {code} <span class="count">{plural(len(wtabs), "tab")}</span>'
             f'<span class="doms">{html.escape(doms)}</span></h2><ul>{"".join(rows)}</ul></section>'
         )
@@ -501,10 +615,13 @@ def render(tabs):
 <span id="shown"></span><button id="closeSel" class="purge" onclick="closeSelected()" hidden></button>
 <button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
 <div id="chips">{"".join(chips)}</div>
-<details id="tray" hidden><summary></summary><ol></ol></details><a id="refresh" href="/">Refresh</a></div>
+<details id="tray" hidden><summary></summary><ol></ol></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
 <p class="hint">Check tabs to close them together (shift-click selects a range). Drag a tab by its grip onto a window or a window chip to move it.
-Moving reopens the page there, so its back/forward history is lost.</p>
-<main>{body}</main><div id="toast" role="status" hidden></div>
+Moving reopens the page there, so its back/forward history is lost.<br>
+Keys: <kbd>/</kbd> filter, <kbd>&uarr;</kbd><kbd>&darr;</kbd> or <kbd>j</kbd><kbd>k</kbd> move between tabs, <kbd>x</kbd> select,
+<kbd>Delete</kbd> close, <kbd>m</kbd> move to window, <kbd>Esc</kbd> clear filter.</p>
+<main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
+<div id="toast" role="status" hidden></div><div id="live" class="sr-only" aria-live="polite"></div>
 <script>{JS.replace("__TOKEN__", json.dumps(TOKEN))}</script></body></html>'''
 
 
@@ -518,7 +635,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        if self.path != "/":
+        if urlparse(self.path).path != "/":
             return self.send_error(404)
         try:
             body = render(list_tabs()).encode()
