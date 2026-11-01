@@ -32,7 +32,7 @@ Undecided. Do not invent a competitive claim.
 ## Operating Context
 
 - Used on a desktop computer during a dedicated cleanup session, not in passing.
-- Current build: a local web page at http://127.0.0.1:8765, served by `sludge_away.py`. It reads and controls Chrome through AppleScript, so it works on macOS only today.
+- Current build: a local web page at http://127.0.0.1:8765, served by `tab_rehab.py`. It reads and controls Chrome through AppleScript, so it works on macOS only today.
 - The page doesn't auto-refresh. The user clicks Refresh after changing tabs elsewhere.
 
 ## Capabilities and Constraints
@@ -49,7 +49,7 @@ Constraints:
 
 ## Brand Commitments
 
-- **Name: Tab Rehab.** It replaces "Chrome Tab Sludge-Away." The code, page title, and README still use the old name until they're renamed.
+- **Name: Tab Rehab.** It replaces "Chrome Tab Sludge-Away."
 - **Voice:** a little playful, with the same light humor as the old name. The humor lives in the name and the occasional line of copy. The work itself stays fast and serious.
 
 ## Evidence on Hand

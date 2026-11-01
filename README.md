@@ -1,6 +1,6 @@
-# Chrome Tab Sludge-Away
+# Tab Rehab
 
-A local web page that lists every open Google Chrome tab, grouped by window, so you can clear tab sludge fast.
+A local web page that lists every open Google Chrome tab, grouped by window, so you can kick the tab habit fast.
 
 - **View** a tab (eye icon) to bring its window to the front and switch to it.
 - **Close** any tab with one click (trash icon).
@@ -13,7 +13,7 @@ macOS only. It talks to Chrome through AppleScript. Python 3 standard library, n
 ## Run
 
 ```
-python3 sludge_away.py
+python3 tab_rehab.py
 ```
 
 Then open http://127.0.0.1:8765. The first run asks you to allow your terminal to control Google Chrome.
