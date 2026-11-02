@@ -146,6 +146,23 @@ def window_code(n):
     return chr(64 + n) if n <= 26 else str(n)
 
 
+CODES = {}  # window id -> number; kept while the server runs so a window keeps its letter across Refresh
+
+
+def assign_codes(wids):
+    for w in [w for w in CODES if w not in wids]:
+        del CODES[w]
+    for w in sorted(wids):
+        if w not in CODES:
+            used = set(CODES.values())
+            CODES[w] = next(n for n in range(1, len(wids) + 2) if n not in used)
+    return CODES
+
+
+def is_self(url):
+    return urlparse(url).netloc in (f"127.0.0.1:{PORT}", f"localhost:{PORT}")
+
+
 def plural(n, word):
     return f"{n} {word}" if n == 1 else f"{n} {word}s"
 
@@ -185,6 +202,7 @@ h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
 .chip .tab{height:100%;border-radius:1px 0 0 1px}
 .chip:hover{border-color:var(--ink)}
 .chip .n{font-weight:700}
+section h2 .all{margin:0 -2px 0 0}
 .chip.over,section.over{outline:2px solid var(--ink);outline-offset:-1px;background:var(--panel)}
 #tray,#keys{position:relative}
 #tray summary,#keys summary{cursor:pointer;color:var(--ink);font-weight:600;list-style:none;height:28px;display:flex;align-items:center;
@@ -204,8 +222,9 @@ h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
 #refresh{font-weight:600;color:var(--ink);border-bottom:1px solid var(--rule-strong)}
 #refresh:hover{border-color:var(--ink)}
 .hint{margin:0;padding:6px 16px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
-main{column-width:460px;column-gap:10px;padding:10px 16px 80px}
-section{border:1px solid var(--rule);background:#fff;min-width:0;break-inside:avoid;margin:0 0 10px}
+main{display:flex;align-items:flex-start;gap:10px;padding:10px 16px 80px}
+.col{flex:1 1 0;min-width:0}
+section{border:1px solid var(--rule);background:#fff;min-width:0;margin:0 0 10px}
 section h2{display:flex;align-items:center;gap:8px;margin:0;height:28px;padding:0 8px 0 0;font-size:12px;font-weight:700;
   border-bottom:1px solid var(--rule-strong);background:var(--panel)}
 .tab{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:100%;padding:0 6px;
@@ -296,6 +315,10 @@ async function viewTab(btn) {
   const r = await call('/view', {w: +li.dataset.w, t: +li.dataset.t});
   if (!r.ok) rowError(li, r.error);
 }
+function openTitle(e, a) {
+  if (a.dataset.web && (e.metaKey || e.ctrlKey || e.shiftKey)) return true;
+  e.preventDefault(); viewTab(a); return false;
+}
 async function copyUrl(btn) {
   try { await navigator.clipboard.writeText(btn.closest('li').dataset.url); flash(btn, 'Copied'); announce('URL copied.'); }
   catch (e) { rowError(btn.closest('li'), 'Copy blocked by the browser.'); }
@@ -303,6 +326,7 @@ async function copyUrl(btn) {
 
 /* Closing, undo */
 const closed = [];          // newest last: {li, w, url, title}
+let lastBatch = null;
 async function closeRows(lis) {
   if (!lis.length) return;
   lis.forEach(li => li.classList.add('busy'));
@@ -323,6 +347,7 @@ async function closeRows(lis) {
   });
   if (!done.length) return;
   closed.push(...done);
+  lastBatch = done;
   updateCounts(); renderTray();
   if (hadFocus) focusRow(next && !next.hidden ? next : null);
   const codes = [...new Set(done.map(d => d.code))];
@@ -331,6 +356,17 @@ async function closeRows(lis) {
 function closeTab(btn) { return closeRows([btn.closest('li')]); }
 function closeSelected() { return closeRows(rows().filter(li => li.classList.contains('sel') && !li.hidden)); }
 function closeShown() { return closeRows(rows().filter(li => !li.hidden)); }
+function dupes() {
+  const seen = new Set();
+  return visible().filter(li => seen.has(li.dataset.url) || !seen.add(li.dataset.url));
+}
+function closeDupes() { return closeRows(dupes()); }
+function undoLast() {
+  const batch = (lastBatch || []).filter(e => closed.includes(e));
+  lastBatch = null;
+  if (batch.length) { $('#toast').hidden = true; reopen(batch); }
+  else if (closed.length) reopen([closed[closed.length - 1]]);
+}
 async function reopen(entries) {
   let lost = 0;
   for (const e of entries) {
@@ -368,7 +404,7 @@ function toast(msg, undo) {
   t.innerHTML = '';
   const s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
   if (undo) {
-    const b = document.createElement('button'); b.className = 'linkbtn'; b.textContent = 'Undo';
+    const b = document.createElement('button'); b.className = 'linkbtn'; b.textContent = 'Undo'; b.title = 'Undo (U)';
     b.onclick = () => { t.hidden = true; undo(); };
     t.appendChild(b);
     const n = document.createElement('small'); n.textContent = 'Reopens without back/forward history'; t.appendChild(n);
@@ -392,6 +428,10 @@ function pick(e) {
   lastPick = li;
   updateBar();
 }
+function pickAll(box) {
+  box.closest('section').querySelectorAll('li').forEach(li => { if (!li.hidden) setSel(li, box.checked); });
+  updateBar();
+}
 function updateBar() {
   const sel = rows().filter(li => li.classList.contains('sel') && !li.hidden).length;
   const shown = rows().filter(li => !li.hidden).length;
@@ -400,6 +440,15 @@ function updateBar() {
   $('#closeSel').textContent = 'Close ' + sel + ' selected';
   $('#closeShown').hidden = !!sel || !q || !shown;
   $('#closeShown').textContent = 'Close all ' + shown + ' shown';
+  const d = dupes().length;
+  $('#closeDup').hidden = !!sel || !d;
+  $('#closeDup').textContent = 'Close ' + plural(d, 'duplicate');
+  $$('main section').forEach(s => {
+    const vis = [...s.querySelectorAll('li')].filter(li => !li.hidden), on = vis.filter(li => li.classList.contains('sel')).length;
+    const box = s.querySelector('.all');
+    box.checked = vis.length > 0 && on === vis.length;
+    box.indeterminate = on > 0 && on < vis.length;
+  });
 }
 
 /* Moving */
@@ -442,7 +491,10 @@ function openMove(btn) {
   const li = btn.closest('li'), m = $('#menu');
   m.innerHTML = '';
   const targets = $$('main section').filter(s => s.dataset.w !== li.dataset.w && s.querySelector('li'));
-  m.innerHTML = '<p class="note">' + (targets.length ? 'Moving reloads the page. Back/forward history is lost.' : 'No other windows. Open one in Chrome, then refresh.') + '</p>';
+  const note = targets.length ? 'Moving reloads the page. Back/forward history is lost.' : 'No other windows. Open one in Chrome, then refresh.';
+  m.innerHTML = '<p class="note" aria-hidden="true"></p>';
+  m.firstChild.textContent = note;
+  m.setAttribute('aria-label', 'Move to window. ' + note);
   targets.forEach(s => {
     const b = document.createElement('button');
     b.setAttribute('role', 'menuitem');
@@ -491,6 +543,7 @@ document.addEventListener('keydown', e => {
   }
   const li = a && a.closest && a.closest('main li');
   if (e.key === '/') { e.preventDefault(); $('#q').focus(); $('#q').select(); return; }
+  if (e.key === 'u' && !(a && a.matches && a.matches('input:not([type=checkbox])'))) { e.preventDefault(); undoLast(); return; }
   if (!li) return;
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'j' || e.key === 'k') {
     e.preventDefault();
@@ -554,9 +607,24 @@ function refresh(a) {
   const q = $('#q').value.trim();
   a.href = q ? '/?q=' + encodeURIComponent(q) : '/';
 }
+/* Fixed columns: each window keeps its column while tabs close; repack only when the column count changes. */
+function pack() {
+  const main = $('main'), secs = $$('main section');
+  if (!secs.length) return;
+  const n = Math.max(1, Math.min(secs.length, Math.floor((main.clientWidth - 32 + 10) / 470)));
+  if (+main.dataset.cols === n) return;
+  main.dataset.cols = n;
+  const cols = Array.from({length: n}, () => Object.assign(document.createElement('div'), {className: 'col'}));
+  const h = new Array(n).fill(0);
+  secs.forEach(s => { const i = h.indexOf(Math.min(...h)); cols[i].appendChild(s); h[i] += s.querySelectorAll('li').length + 1; });
+  main.replaceChildren(...cols);
+}
+pack();
+addEventListener('resize', pack);
 (() => {
   const q = new URLSearchParams(location.search).get('q');
-  if (q) { $('#q').value = q; filter(); }
+  if (q) $('#q').value = q;
+  filter();
 })();
 '''
 
@@ -573,9 +641,10 @@ def render(tabs):
     windows = {}
     for tab in tabs:
         windows.setdefault(tab["w"], []).append(tab)
+    codes = assign_codes(set(windows))
     sections, chips = [], []
-    for n, (w, wtabs) in enumerate(windows.items(), 1):
-        code = window_code(n)
+    for w, wtabs in sorted(windows.items(), key=lambda kv: codes[kv[0]]):
+        code = window_code(codes[w])
         rows = []
         for tab in wtabs:
             host = host_of(tab["url"])
@@ -583,11 +652,10 @@ def render(tabs):
             title = html.escape(tab["title"])
             url = html.escape(tab["url"])
             tip = f'{title}&#10;{url}'
-            # Only web URLs get a link; a page can't open chrome:// or file:// links anyway.
-            if urlparse(tab["url"]).scheme in ("http", "https"):
-                title_el = f'<a class="title" href="{url}" target="_blank" rel="noopener" title="{tip}">{title}</a>'
-            else:
-                title_el = f'<span class="title" title="{tip}">{title}</span>'
+            # A click switches to the open tab. Cmd/Ctrl/Shift-click still opens a web URL as a new tab.
+            web = ' data-web="1"' if urlparse(tab["url"]).scheme in ("http", "https") else ""
+            title_el = (f'<a class="title" href="{url}"{web} target="_blank" rel="noopener" onclick="return openTitle(event, this)" '
+                        f'title="{tip}&#10;Click to switch to this tab">{title}</a>')
             find = html.escape(f'{tab["title"]} {tab["url"]}'.lower())
             rows.append(
                 f'<li data-w="{w}" data-t="{tab["t"]}" data-url="{url}" data-find="{find}">'
@@ -608,7 +676,8 @@ def render(tabs):
         drop = 'ondragover="dragOver(event)" ondragleave="this.classList.remove(\'over\')" ondrop="drop(event)"'
         sections.append(
             f'<section data-w="{w}" data-code="{code}" aria-label="Window {code}" {drop}>'
-            f'<h2><span class="tab">{code}</span>Window {code} <span class="count">{plural(len(wtabs), "tab")}</span>'
+            f'<h2><span class="tab">{code}</span><input type="checkbox" class="all" onclick="pickAll(this)" '
+            f'title="Select every shown tab in this window" aria-label="Select all tabs in window {code}">Window {code} <span class="count">{plural(len(wtabs), "tab")}</span>'
             f'<span class="doms">{html.escape(doms)}</span></h2><ul>{"".join(rows)}</ul></section>'
         )
         chips.append(
@@ -621,11 +690,12 @@ def render(tabs):
 <meta name="viewport" content="width=device-width,initial-scale=1"><style>{CSS}</style></head><body>
 <header><h1>Tab Rehab</h1><span id="total">{total}</span></header>
 <div id="bar"><label for="q">Filter</label><input id="q" placeholder="Title or URL" oninput="filter()" autocomplete="off">
-<span id="shown"></span><button id="closeSel" class="purge" onclick="closeSelected()" hidden></button>
+<span id="shown"></span><div id="chips">{"".join(chips)}</div>
+<button id="closeSel" class="purge" onclick="closeSelected()" hidden></button>
 <button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
-<div id="chips">{"".join(chips)}</div>
+<button id="closeDup" class="purge" onclick="closeDupes()" title="Keeps the first copy of each page" hidden></button>
 <details id="tray" hidden><summary></summary><div class="pop"><p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p><ol></ol></div></details>
-<details id="keys"><summary>Keys</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
+<details id="keys"><summary>Keys</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
 <p class="hint">Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move a tab; its back/forward history is lost.</p>
 <p id="none" class="empty" hidden></p><main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
 <div id="toast" role="status" hidden></div><div id="live" class="sr-only" aria-live="polite"></div>
@@ -645,7 +715,7 @@ class Handler(BaseHTTPRequestHandler):
         if urlparse(self.path).path != "/":
             return self.send_error(404)
         try:
-            body = render(list_tabs()).encode()
+            body = render([t for t in list_tabs() if not is_self(t["url"])]).encode()
         except RuntimeError as e:
             page = ERROR_PAGE.replace("{reason}", html.escape(friendly(e))).replace("{detail}", html.escape(str(e)))
             return self.reply(500, page.encode(), "text/html; charset=utf-8")
