@@ -2,11 +2,12 @@
 
 A local web page that lists every open Google Chrome tab, grouped by window, so you can kick the tab habit fast.
 
-- **View** a tab (eye icon) to bring its window to the front and switch to it.
-- **Close** any tab with one click (trash icon).
-- **Move** a tab to another window by dragging its grip onto that window.
-- **Filter** by title or URL.
-- Click a URL to open it, or use the copy icon to put the clean URL on your clipboard.
+- **Switch** to a tab by clicking its title (or the eye icon). Cmd-click opens the URL as a new tab instead.
+- **Close** any tab with one click (trash icon), or check several (one window at a time with its header checkbox) and close them together.
+- **Close duplicates** keeps the first copy of each page and closes the rest.
+- **Undo** reopens what you just closed (press `u`), without back/forward history.
+- **Move** a tab to another window by dragging its grip, or with the move button (`m`).
+- **Filter** by title or URL. Press "Keys" on the page for every shortcut.
 
 macOS only. It talks to Chrome through AppleScript. Python 3 standard library, no dependencies.
 

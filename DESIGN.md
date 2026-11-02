@@ -166,9 +166,9 @@ Site monograms are the one place other hues appear. Each host gets a hue from it
 
 ## Layout
 
-A sticky Panel Gray bar sits under a short header and holds, left to right: the labeled filter, the "N of M" count, purge buttons when relevant, one chip per window, then the recently closed tray, Keys, and Refresh pushed right. A 2px Ink rule closes the bar. Below it, a single one-line hint, then the window modules.
+A sticky Panel Gray bar sits under a short header and holds, left to right: the labeled filter, the "N of M" count, one chip per window, purge buttons when relevant (close selected, close all shown, close duplicates), then the recently closed tray, Keys, and Refresh pushed right. Chips sit before the purge buttons so they never shift when a button appears. A 2px Ink rule closes the bar. Below it, a single one-line hint, then the window modules.
 
-Modules flow in CSS columns (column width 460px, 10px gap, 10px between modules), so short windows pack under each other instead of leaving holes. Modules never break across columns. Page padding is 16px at the sides.
+Modules pack into fixed columns (at least 460px wide, 10px gap, 10px between modules), so short windows sit under each other instead of leaving holes. Each window is assigned to a column once, at page load, by shortest column first, and stays there while tabs close; the page repacks only when a window resize changes the column count. Windows are lettered by Chrome window id and keep their letter for as long as the server runs. Page padding is 16px at the sides.
 
 Rows are a fixed grid: checkbox, grip, monogram, title (flexible, ellipsis), host (max 170px), trash. View, copy, and move appear on hover or focus as an overlay on top of the host cell, so the row never reflows.
 
