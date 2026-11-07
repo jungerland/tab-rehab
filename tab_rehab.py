@@ -193,6 +193,7 @@ h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
   border:1px solid var(--rule-strong);border-radius:2px;caret-color:var(--red)}
 #q::placeholder{color:var(--ink-3)}
 #shown{color:var(--ink-2)}
+#cols{height:28px;padding:0 6px;font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:2px}
 .purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:var(--red);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 .purge:hover{background:var(--red-ink)}
 .purge:disabled{opacity:.6;cursor:progress}
@@ -611,7 +612,8 @@ function refresh(a) {
 function pack() {
   const main = $('main'), secs = $$('main section');
   if (!secs.length) return;
-  const n = Math.max(1, Math.min(secs.length, Math.floor((main.clientWidth - 32 + 10) / 470)));
+  const want = localStorage.getItem('cols') || 'auto';
+  const n = Math.max(1, Math.min(secs.length, want === 'auto' ? Math.floor((main.clientWidth - 32 + 10) / 470) : +want));
   if (+main.dataset.cols === n) return;
   main.dataset.cols = n;
   const cols = Array.from({length: n}, () => Object.assign(document.createElement('div'), {className: 'col'}));
@@ -619,6 +621,11 @@ function pack() {
   secs.forEach(s => { const i = h.indexOf(Math.min(...h)); cols[i].appendChild(s); h[i] += s.querySelectorAll('li').length + 1; });
   main.replaceChildren(...cols);
 }
+function setCols(v) {
+  localStorage.setItem('cols', v);
+  pack();
+}
+$('#cols').value = localStorage.getItem('cols') || 'auto';
 pack();
 addEventListener('resize', pack);
 (() => {
@@ -695,6 +702,7 @@ def render(tabs):
 <button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
 <button id="closeDup" class="purge" onclick="closeDupes()" title="Keeps the first copy of each page" hidden></button>
 <details id="tray" hidden><summary></summary><div class="pop"><p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p><ol></ol></div></details>
+<label for="cols">Columns</label><select id="cols" onchange="setCols(this.value)"><option value="auto">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
 <details id="keys"><summary>Keys</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
 <p class="hint">Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move a tab; its back/forward history is lost.</p>
 <p id="none" class="empty" hidden></p><main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
