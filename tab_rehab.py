@@ -193,7 +193,7 @@ h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
   border:1px solid var(--rule-strong);border-radius:2px;caret-color:var(--red)}
 #q::placeholder{color:var(--ink-3)}
 #shown{color:var(--ink-2)}
-#cols{height:28px;padding:0 6px;font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:2px}
+#cols,.sel{height:28px;padding:0 6px;font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:2px}
 .purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:var(--red);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 .purge:hover{background:var(--red-ink)}
 .purge:disabled{opacity:.6;cursor:progress}
@@ -204,6 +204,10 @@ body.dragging #chips{visibility:visible}
 .chip .tab{height:100%;border-radius:1px 0 0 1px}
 .chip:hover{border-color:var(--ink)}
 .chip .n{font-weight:700}
+li .wtag{display:none;min-width:18px;width:18px;height:18px;padding:0;border-radius:2px;font-size:10px}
+body.bysite li .wtag{display:flex}
+body.bysite li .mono{display:none}
+section[data-site] h2{padding-left:8px}
 section h2 .all{margin:0 -2px 0 0}
 .chip.over,section.over{outline:2px solid var(--ink);outline-offset:-1px;background:var(--panel)}
 #tray,#keys{position:relative}
@@ -356,7 +360,7 @@ async function closeRows(lis) {
     li.classList.remove('busy');
     if (failed.has(li.dataset.w + ':' + li.dataset.t)) { rowError(li, "Couldn't close. Refresh the page."); return; }
     setSel(li, false);
-    done.push({li, w: +li.dataset.w, code: li.closest('section').dataset.code, url: li.dataset.url, title: li.querySelector('.title').textContent});
+    done.push({li, w: +li.dataset.w, code: li.dataset.code, url: li.dataset.url, title: li.querySelector('.title').textContent});
     li.remove();
   });
   if (!done.length) return;
@@ -373,7 +377,7 @@ function closeSelected() { return closeRows(rows().filter(li => li.classList.con
 function closeShown() { return closeRows(rows().filter(li => !li.hidden)); }
 function dupes() {
   // Keep the copy in the earliest window letter (then the first in that window), whatever the column layout.
-  const seen = new Set(), n = li => +li.closest('section').dataset.n;
+  const seen = new Set(), n = li => +li.dataset.n;
   return visible().sort((a, b) => n(a) - n(b)).filter(li => seen.has(li.dataset.url) || !seen.add(li.dataset.url));
 }
 function selectDupes() {
@@ -405,7 +409,7 @@ async function reopen(entries) {
     if (i >= 0) closed.splice(i, 1);
     done++;
     const sec = $('section[data-w="' + r.data.w + '"]');
-    if (sec) { e.li.dataset.w = r.data.w; e.li.dataset.t = r.data.t; sec.querySelector('ul').appendChild(e.li); }
+    if (sec) { e.li.dataset.w = r.data.w; e.li.dataset.t = r.data.t; home(e.li, sec); }
     else lost++;
   }
   entries.forEach(e => e.pending = false);
@@ -506,7 +510,7 @@ function dragEnd() {
 }
 function dragOver(e) {
   const s = e.currentTarget;
-  if (!dragged || s.dataset.w === dragged.dataset.w) return;
+  if (!dragged || !s.dataset.w || s.dataset.w === dragged.dataset.w) return;
   e.preventDefault();
   s.classList.add('over');
 }
@@ -518,7 +522,7 @@ async function moveRow(li, w) {
   if (!r.ok) { rowError(li, 'Move failed: ' + r.error); return false; }
   li.dataset.w = w; li.dataset.t = r.data.t;
   const sec = $('section[data-w="' + w + '"]');
-  sec.querySelector('ul').appendChild(li);
+  home(li, sec);
   updateCounts();
   announce('Moved to window ' + sec.dataset.code + '.');
   return true;
@@ -529,7 +533,7 @@ let menuFor = null;
 function openMove(btn) {
   const li = btn.closest('li'), m = $('#menu');
   m.innerHTML = '';
-  const targets = $$('main section').filter(s => s.dataset.w !== li.dataset.w && s.querySelector('li'));
+  const targets = $$('main section[data-w]').filter(s => s.dataset.w !== li.dataset.w && winRows(s.dataset.w).length);
   const note = targets.length ? 'Moving reloads the page. Back/forward history is lost.' : 'No other windows. Open one in Chrome, then refresh.';
   m.innerHTML = '<p class="note" aria-hidden="true"></p>';
   m.firstChild.textContent = note;
@@ -539,7 +543,7 @@ function openMove(btn) {
     b.setAttribute('role', 'menuitem');
     b.innerHTML = '<span class="tab"></span><span></span>';
     b.firstChild.textContent = s.dataset.code;
-    b.lastChild.textContent = 'Window ' + s.dataset.code + ', ' + s.querySelector('.count').textContent;
+    b.lastChild.textContent = 'Window ' + s.dataset.code + ', ' + plural(winRows(s.dataset.w).length, 'tab');
     b.onclick = async () => {
       const next = neighbor([li]);
       closeMenu(false);
@@ -618,12 +622,18 @@ function jump(chip) {
 }
 
 /* Counts and filter */
+const winRows = w => rows().filter(li => li.dataset.w === String(w));
+function home(li, sec) {
+  // A row that lands in a window (move, reopen) takes that window's letter and goes last in it.
+  li.dataset.n = sec.dataset.n; li.dataset.code = sec.dataset.code;
+  li.querySelector('.wtag').textContent = sec.dataset.code;
+  li.dataset.idx = Math.max(...rows().map(r => +r.dataset.idx)) + 1;
+  sec.querySelector('ul').appendChild(li);
+  if (group() === 'site') regroup();
+}
 function updateCounts() {
-  $$('main section').forEach(s => {
-    const chip = $('.chip[data-w="' + s.dataset.w + '"]');
-    if (chip) chip.hidden = !s.querySelector('li');
-  });
-  const wins = $$('main section').filter(s => s.querySelector('li')).length, gone = tally(0);
+  $$('.chip').forEach(chip => chip.hidden = !winRows(chip.dataset.w).length);
+  const wins = new Set(rows().map(li => li.dataset.w)).size, gone = tally(0);
   $('#total').textContent = plural(rows().length, 'tab') + ' in ' + plural(wins, 'window') + (gone ? ', ' + gone + ' closed this session' : '');
   filter();
 }
@@ -639,8 +649,11 @@ function filter() {
     s.hidden = !any;
     const all = s.querySelectorAll('li').length, vis = s.querySelectorAll('li:not([hidden])').length;
     s.querySelector('.count').textContent = q ? vis + ' of ' + plural(all, 'tab') : plural(all, 'tab');
-    const chip = $('.chip[data-w="' + s.dataset.w + '"]');
-    if (chip) { chip.querySelector('.n').textContent = q ? vis : all; chip.classList.toggle('nomatch', !!q && !vis); }
+  });
+  $$('.chip').forEach(chip => {
+    const all = winRows(chip.dataset.w), vis = all.filter(li => !li.hidden).length;
+    chip.querySelector('.n').textContent = q ? vis : all.length;
+    chip.classList.toggle('nomatch', !!q && !vis);
   });
   $('#shown').textContent = q ? shown + ' of ' + plural(rows().length, 'tab') : '';
   const none = $('#none');
@@ -655,26 +668,67 @@ function refresh(a) {
   a.href = q ? '/?q=' + encodeURIComponent(q) : '/';
 }
 /* Fixed columns: each window keeps its column while tabs close; repack only when the column count changes. */
-function pack() {
-  const main = $('main'), secs = $$('main section');
+function pack(force) {
+  const main = $('main'), secs = $$('main section').filter(s => s.querySelector('li'));
   if (!secs.length) return;
   const want = localStorage.getItem('cols') || '2';
   const n = Math.max(1, Math.min(secs.length, want === 'auto' ? Math.floor((main.clientWidth - 32 + 10) / 470) : +want));
-  if (+main.dataset.cols === n) return;
+  if (force !== true && +main.dataset.cols === n) return;
   main.dataset.cols = n;
   const cols = Array.from({length: n}, () => Object.assign(document.createElement('div'), {className: 'col'}));
   const h = new Array(n).fill(0);
   secs.forEach(s => { const i = h.indexOf(Math.min(...h)); cols[i].appendChild(s); h[i] += s.querySelectorAll('li').length + 1; });
+  const parked = $$('main section').filter(s => !s.querySelector('li'));   // empty window sections stay as move targets
   main.replaceChildren(...cols);
+  parked.forEach(s => { s.hidden = true; cols[0].appendChild(s); });
 }
 function setCols(v) {
   localStorage.setItem('cols', v);
   pack();
 }
 $('#cols').value = localStorage.getItem('cols') || '2';
+
+/* Group by Window (default) or Site. Site view gathers each domain's tabs into one module, biggest first;
+   sites with a single tab share one module at the end. Rows keep their window letter as a small red tag. */
+const group = () => localStorage.getItem('group') || 'window';
+function setGroup(v) { localStorage.setItem('group', v); regroup(); announce(v === 'site' ? 'Grouped by site.' : 'Grouped by window.'); }
+function regroup() {
+  const bySite = group() === 'site', all = rows().sort((a, b) => a.dataset.idx - b.dataset.idx);
+  document.body.classList.toggle('bysite', bySite);
+  $$('main section[data-site]').forEach(s => s.remove());
+  if (!bySite) {
+    all.forEach(li => $('section[data-w="' + li.dataset.w + '"] ul').appendChild(li));
+  } else {
+    const sites = new Map();
+    all.forEach(li => { const h = li.dataset.host; if (!sites.has(h)) sites.set(h, []); sites.get(h).push(li); });
+    const big = [...sites].filter(([, l]) => l.length > 1).sort((a, b) => b[1].length - a[1].length);
+    const singles = [...sites].filter(([, l]) => l.length === 1).flatMap(([, l]) => l);
+    const main = $('main');
+    const mk = (key, label, lis, mono) => {
+      const s = document.createElement('section');
+      s.dataset.site = key;
+      s.setAttribute('aria-label', label);
+      s.innerHTML = '<h2><input type="checkbox" class="all" onclick="pickAll(this)"><span class="name"></span> <span class="count"></span><span class="doms"></span></h2><ul></ul>';
+      if (mono) s.querySelector('h2').prepend(mono.cloneNode(true));
+      s.querySelector('.all').setAttribute('aria-label', 'Select all tabs in ' + label);
+      s.querySelector('.all').title = 'Select every shown tab in this group';
+      s.querySelector('.name').textContent = label;
+      const codes = [...new Set(lis.map(li => li.dataset.code))].sort();
+      s.querySelector('.doms').textContent = codes.length > 1 ? 'in windows ' + codes.join(', ') : 'in window ' + codes[0];
+      lis.forEach(li => s.querySelector('ul').appendChild(li));
+      main.appendChild(s);
+    };
+    big.forEach(([h, lis]) => mk(h, h, lis, lis[0].querySelector('.mono')));
+    if (singles.length) mk('', 'Sites with one tab', singles, null);
+  }
+  pack(true);
+  updateCounts();
+}
+$('#group').value = group();
+if (group() === 'site') regroup();
 function hideHint() { localStorage.setItem('hint', 'off'); $('#hint').hidden = true; announce('Tips hidden. They are under Shortcuts.'); }
 if (localStorage.getItem('hint') === 'off') $('#hint').hidden = true;
-pack();
+if (group() !== 'site') pack();
 addEventListener('resize', pack);
 (() => {
   const q = new URLSearchParams(location.search).get('q');
@@ -697,7 +751,7 @@ def render(tabs):
     for tab in tabs:
         windows.setdefault(tab["w"], []).append(tab)
     codes = assign_codes(set(windows))
-    sections, chips = [], []
+    sections, chips, idx = [], [], 0
     for w, wtabs in sorted(windows.items(), key=lambda kv: codes[kv[0]]):
         code = window_code(codes[w])
         rows = []
@@ -712,13 +766,15 @@ def render(tabs):
             title_el = (f'<a class="title" href="{url}"{web} target="_blank" rel="noopener" onclick="return openTitle(event, this)" '
                         f'title="{tip}&#10;Click to switch to this tab">{title}</a>')
             find = html.escape(f'{tab["title"]} {tab["url"]}'.lower())
+            idx += 1
             rows.append(
-                f'<li data-w="{w}" data-t="{tab["t"]}" data-url="{url}" data-find="{find}">'
+                f'<li data-w="{w}" data-t="{tab["t"]}" data-n="{codes[w]}" data-code="{code}" data-idx="{idx}" '
+                f'data-host="{html.escape(host)}" data-url="{url}" data-find="{find}">'
                 f'<input type="checkbox" class="pick" onclick="pick(event)" aria-label="Select: {title}">'
                 f'<span class="grip" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd()" '
                 f'title="Drag onto another window" aria-hidden="true">{ICONS["grip"]}</span>'
                 f'<span class="mono" style="background:hsl({hue} 55% 91%);color:hsl({hue} 60% 26%)" aria-hidden="true">'
-                f'{html.escape(host[:1] or "?")}</span>'
+                f'{html.escape(host[:1] or "?")}</span><span class="tab wtag" title="In window {code}">{code}</span>'
                 f'{title_el}<span class="host">{html.escape(host)}</span>'
                 f'<span class="more">'
                 f'<button class="vw" onclick="viewTab(this)" title="Switch to this tab in Chrome" aria-label="View in Chrome: {title}">{ICONS["view"]}</button>'
@@ -750,6 +806,7 @@ def render(tabs):
 <button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
 <button id="closeDup" class="barbtn" onclick="selectDupes()" title="Selects every extra copy of a page. The copy in the earliest window is kept." hidden></button>
 <details id="tray" hidden><summary></summary><div class="pop"><ol></ol></div></details>
+<label for="group">Group by</label><select id="group" class="sel" onchange="setGroup(this.value)"><option value="window">Window</option><option value="site">Site</option></select>
 <label for="cols">Columns</label><select id="cols" onchange="setCols(this.value)"><option value="auto">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
 <details id="keys"><summary>Shortcuts</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd> <kbd>Space</kbd></dt><dd>Select tab</dd><dt>Shift-click</dt><dd>Select a range</dd><dt><kbd>Delete</kbd></dt><dd>Close this tab, or the selection it's in</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd><dt>Click title</dt><dd>Switch to that tab</dd><dt>Drag grip</dt><dd>Move to a window or chip</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
 <p class="hint" id="hint">Click a title to switch to that tab. Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move it. <button onclick="hideHint()">Hide tips</button></p>
