@@ -169,119 +169,114 @@ def plural(n, word):
 
 CSS = '''
 :root{
-  --ink:#16181b; --ink-2:#4a5059; --ink-3:#5f6670; --ground:#fff; --panel:#f3f4f6;
-  --rule:#d5d9de; --rule-strong:#8a919b; --red:#d7000f; --red-ink:#b5000c; --red-wash:#fff1f1;
-  --row:30px;
+  --ink:#202124; --ink-2:#5f6368; --ink-3:#6b6f75; --ground:#fff; --panel:#f4f4f4; --hover:#f2f2f2;
+  --rule:#e0e0e0; --rule-strong:#c4c4c4; --blue:#1a73e8; --blue-ink:#1765cc; --blue-wash:#e8f0fe; --err:#c5221f;
+  --row:32px;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html{color-scheme:light;scrollbar-color:var(--rule-strong) var(--panel)}
+html{color-scheme:light}
 body{margin:0;background:var(--ground);color:var(--ink);
-  font:12px/1.4 "Hiragino Sans","Hiragino Kaku Gothic ProN","Segoe UI","Noto Sans",system-ui,sans-serif;
+  font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
   font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
-::selection{background:var(--red);color:#fff}
 a{color:inherit;text-decoration:none}
-:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
-input[type=checkbox]{accent-color:var(--red);width:14px;height:14px;margin:0;cursor:pointer}
-header{display:flex;align-items:baseline;gap:12px;padding:14px 16px 10px}
-h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
-#total{color:var(--ink-2);font-size:12px}
-#bar{position:sticky;top:0;z-index:3;background:var(--panel);border-top:1px solid var(--rule);
-  border-bottom:2px solid var(--ink);padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
-#bar label{font-weight:600;color:var(--ink-2)}
-#q{width:280px;height:28px;padding:0 8px;font:inherit;font-size:13px;color:var(--ink);background:#fff;
-  border:1px solid var(--rule-strong);border-radius:2px;caret-color:var(--red)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+input[type=checkbox]{accent-color:var(--blue);width:15px;height:15px;margin:0;cursor:pointer}
+header{display:flex;align-items:baseline;gap:12px;padding:16px 20px 10px}
+h1{font-size:20px;font-weight:600;margin:0}
+#total{color:var(--ink-2)}
+#bar{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid var(--rule);
+  padding:8px 20px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+#bar label{color:var(--ink-2)}
+#q{width:300px;height:32px;padding:0 10px;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:6px}
+#q:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 1px var(--blue)}
 #q::placeholder{color:var(--ink-3)}
 #shown{color:var(--ink-2)}
-#cols,.sel{height:28px;padding:0 6px;font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:2px}
-.purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:var(--red);color:#fff;font:inherit;font-weight:700;cursor:pointer}
-.purge:hover{background:var(--red-ink)}
+#cols,.picker{height:32px;padding:0 6px;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:6px}
+.purge{height:32px;padding:0 14px;border:0;border-radius:6px;background:var(--blue);color:#fff;font:inherit;font-weight:500;cursor:pointer}
+.purge:hover{background:var(--blue-ink)}
 .purge:disabled{opacity:.6;cursor:progress}
 #chips{display:flex;gap:6px;flex:1;min-width:120px;overflow-x:auto;scrollbar-width:thin;visibility:hidden}
 body.dragging #chips{visibility:visible}
-.chip{flex:none;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 0;border:1px solid var(--rule-strong);
-  border-radius:2px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
-.chip .tab{height:100%;border-radius:1px 0 0 1px}
-.chip:hover{border-color:var(--ink)}
-.chip .n{font-weight:700}
-li .wtag{display:none;min-width:18px;width:18px;height:18px;padding:0;border-radius:2px;font-size:10px}
+.chip{flex:none;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px 0 6px;border:1px solid var(--rule-strong);
+  border-radius:15px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
+.chip:hover{border-color:var(--ink-2)}
+.chip .n{color:var(--ink-2)}
+li .wtag{display:none}
 body.bysite li .wtag{display:flex}
 body.bysite li .mono{display:none}
-section[data-site] h2{padding-left:8px}
-section h2 .all{margin:0 -2px 0 0}
-.chip.over,section.over{outline:2px solid var(--ink);outline-offset:-1px;background:var(--panel)}
+section h2 .all{margin:0}
+.chip.over,section.over{outline:2px solid var(--blue);outline-offset:-1px;background:var(--blue-wash)}
 #tray,#keys{position:relative}
-#tray summary,#keys summary{cursor:pointer;color:var(--ink);font-weight:600;list-style:none;height:28px;display:flex;align-items:center;
-  padding:0 8px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
+#tray summary,#keys summary{cursor:pointer;color:var(--ink);font-weight:500;list-style:none;height:32px;display:flex;align-items:center;
+  padding:0 12px;border:1px solid var(--rule-strong);border-radius:6px;background:#fff}
 #tray summary::-webkit-details-marker,#keys summary::-webkit-details-marker{display:none}
-#tray[open] summary,#keys[open] summary{border-color:var(--ink)}
-.pop{position:absolute;right:0;top:32px;width:440px;background:#fff;border:1px solid var(--rule-strong);box-shadow:0 2px 6px rgba(22,24,27,.16)}
-.pop ol{max-height:60vh;overflow:auto;margin:0;padding:0;list-style:none}
-#tray li{grid-template-columns:26px 18px minmax(0,1fr) auto;padding:0 6px 0 0}
-#tray li .tab{height:100%}
-.note{margin:0;padding:6px 8px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
-#keys .pop{width:300px;padding:6px 10px}
-#keys dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:0}
+#tray summary:hover,#keys summary:hover{background:var(--hover)}
+.pop{position:absolute;right:0;top:38px;width:440px;background:#fff;border:1px solid var(--rule);border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.pop ol{max-height:60vh;overflow:auto;margin:0;padding:4px 0;list-style:none}
+#tray li{grid-template-columns:22px 18px minmax(0,1fr) auto;padding:0 8px 0 10px}
+.note{margin:0;padding:8px 12px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
+#keys .pop{width:320px;padding:10px 14px}
+#keys dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0}
 #keys dd{margin:0;color:var(--ink-2)}
-.linkbtn{border:0;background:none;padding:0 4px;height:24px;font:inherit;font-weight:700;color:var(--red-ink);cursor:pointer;
-  text-decoration:underline;text-underline-offset:2px}
-.barbtn,#refresh{height:28px;display:inline-flex;align-items:center;padding:0 10px;border:1px solid var(--rule-strong);border-radius:2px;
-  background:#fff;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
-.barbtn:hover,#refresh:hover{border-color:var(--ink)}
+.linkbtn{border:0;background:none;padding:0 6px;height:28px;font:inherit;font-weight:500;color:var(--blue);cursor:pointer;border-radius:4px}
+.linkbtn:hover{background:var(--blue-wash)}
+.barbtn,#refresh{height:32px;display:inline-flex;align-items:center;padding:0 12px;border:1px solid var(--rule-strong);border-radius:6px;
+  background:#fff;color:var(--blue);font:inherit;font-weight:500;cursor:pointer}
+.barbtn:hover,#refresh:hover{background:var(--blue-wash)}
 .chip.nomatch{opacity:.45}
-.hint button{border:0;background:none;padding:0 2px;font:inherit;font-weight:600;color:var(--ink);text-decoration:underline;
-  text-underline-offset:2px;cursor:pointer}
-li.dup .host::before{content:"duplicate";display:inline-block;margin-right:6px;padding:0 4px;border:1px solid var(--rule-strong);
-  border-radius:2px;color:var(--ink-2);font-size:10px;line-height:14px}
+.hint{margin:0;padding:8px 20px;color:var(--ink-2)}
+.hint button{border:0;background:none;padding:0 2px;font:inherit;color:var(--blue);cursor:pointer}
+li.dup .host::before{content:"duplicate";display:inline-block;margin-right:6px;padding:0 6px;border-radius:8px;background:var(--panel);
+  color:var(--ink-2);font-size:11px;line-height:16px}
 li.dup .host.err::before{content:none}
-.hint{margin:0;padding:6px 16px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
-main{display:flex;align-items:flex-start;gap:10px;padding:10px 16px 80px}
+main{display:flex;align-items:flex-start;gap:16px;padding:8px 20px 80px}
 .col{flex:1 1 0;min-width:0}
-section{border:1px solid var(--rule);background:#fff;min-width:0;margin:0 0 10px}
-section h2{display:flex;align-items:center;gap:8px;margin:0;height:28px;padding:0 8px 0 0;font-size:12px;font-weight:700;
-  border-bottom:1px solid var(--rule-strong);background:var(--panel)}
-.tab{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:100%;padding:0 6px;
-  background:var(--red);color:#fff;font-weight:700;letter-spacing:.02em}
+section{border:1px solid var(--rule);border-radius:8px;background:#fff;min-width:0;margin:0 0 16px;overflow:hidden}
+section h2{display:flex;align-items:center;gap:10px;margin:0;height:40px;padding:0 12px 0 10px;font-size:13px;font-weight:600;
+  border-bottom:1px solid var(--rule)}
+section h2 > .tab{display:none}
+.tab{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:4px;
+  background:var(--panel);color:var(--ink);font-size:11px;font-weight:600}
 section h2 .count{font-weight:400;color:var(--ink-2)}
-section h2 .doms{margin-left:auto;font-weight:400;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+section h2 .doms{margin-left:auto;font-weight:400;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 ul{list-style:none;margin:0;padding:0}
-li{position:relative;display:grid;grid-template-columns:22px 14px 18px minmax(0,1fr) auto 24px;align-items:center;gap:6px;
-  height:var(--row);padding:0 4px 0 6px;border-bottom:1px solid #eceef1;background:#fff}
-li:last-child{border-bottom:0}
-li:hover,li:focus-within{background:#f7f8fa}
-li.sel{background:var(--red-wash)}
+li{position:relative;display:grid;grid-template-columns:22px 12px 18px minmax(0,1fr) auto 28px;align-items:center;gap:8px;
+  height:var(--row);padding:0 6px 0 10px;background:#fff}
+li:hover,li:focus-within{background:var(--hover)}
+li.sel{background:var(--blue-wash)}
 li.moving,li.busy{opacity:.45}
-.grip{display:flex;justify-content:center;color:var(--rule-strong);cursor:grab}
-.grip:hover{color:var(--ink)}
-.mono{width:18px;height:18px;border-radius:2px;display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;text-transform:uppercase}
-.title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;color:var(--ink)}
+.grip{display:flex;justify-content:center;color:var(--rule-strong);cursor:grab;opacity:0}
+li:hover .grip,li:focus-within .grip{opacity:1}
+.grip:hover{color:var(--ink-2)}
+.mono{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:600;text-transform:uppercase}
+.title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
 a.title:hover{text-decoration:underline;text-underline-offset:2px}
-.host{max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-3);font-size:11px;text-align:right}
-.host.err{max-width:320px;color:var(--ink);font-weight:700}
-.more{position:absolute;right:32px;top:3px;display:flex;gap:2px;padding-left:6px;background:inherit;opacity:0}
+.host{max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2);font-size:12px;text-align:right}
+.host.err{max-width:320px;color:var(--err);font-weight:500}
+.more{position:absolute;right:38px;top:2px;display:flex;gap:2px;padding-left:8px;background:inherit;opacity:0}
 li:hover .more,li:focus-within .more{opacity:1}
-.more button,.del{width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;
-  background:transparent;color:var(--ink-3);cursor:pointer;font:inherit;font-size:10px}
-.more button:hover{background:#e6e8eb;color:var(--ink)}
-.del{color:var(--ink-3)}
-li:hover .del,li:focus-within .del,li.sel .del{color:var(--red-ink)}
-li .del:hover{background:var(--red);color:#fff}
-.more svg,.del svg{width:15px;height:15px}
-#toast{position:fixed;left:16px;bottom:16px;z-index:4;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);
-  padding:10px 12px;background:var(--ink);color:#fff;border-radius:2px;box-shadow:0 8px 24px rgba(22,24,27,.25)}
-#toast .linkbtn{color:#fff}
-#toast small{color:#c9cdd3}
-#menu{position:fixed;z-index:5;width:240px;padding:4px 0;background:#fff;border:1px solid var(--rule-strong);
-  box-shadow:0 2px 6px rgba(22,24,27,.16)}
-#menu button{display:flex;align-items:center;gap:8px;width:100%;height:30px;padding:0 8px 0 0;border:0;background:none;
+.more button,.del{width:28px;height:28px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:50%;
+  background:transparent;color:var(--ink-2);cursor:pointer;font:inherit;font-size:11px}
+.more button:hover,.del:hover{background:#e3e3e3;color:var(--ink)}
+.more svg,.del svg{width:16px;height:16px}
+#toast{position:fixed;left:20px;bottom:20px;z-index:4;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 40px);
+  padding:12px 16px;background:#323232;color:#fff;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.24)}
+#toast .linkbtn{color:#8ab4f8}
+#toast .linkbtn:hover{background:rgba(255,255,255,.08)}
+#toast small{color:#c4c4c4}
+#menu{position:fixed;z-index:5;width:240px;padding:6px 0;background:#fff;border:1px solid var(--rule);border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.12)}
+#menu button{display:flex;align-items:center;gap:10px;width:100%;height:32px;padding:0 12px;border:0;background:none;
   font:inherit;color:var(--ink);text-align:left;cursor:pointer}
-#menu button:hover,#menu button:focus-visible{background:var(--panel);outline:2px solid var(--ink);outline-offset:-2px}
-#menu .note{margin:0;padding:6px 10px;color:var(--ink-2)}
-kbd{font:inherit;font-size:11px;padding:0 4px;margin:0 1px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff;color:var(--ink)}
+#menu button:hover,#menu button:focus-visible{background:var(--hover);outline:none}
+#menu .note{margin:0;padding:6px 12px 8px;color:var(--ink-2)}
+kbd{font:inherit;font-size:11px;padding:1px 5px;margin:0 1px;border:1px solid var(--rule-strong);border-radius:4px;background:var(--panel);color:var(--ink)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.empty{padding:40px 16px;color:var(--ink-2);font-size:13px}
-@media (prefers-reduced-motion:no-preference){li,.chip,.more,.more button,.del{transition:background-color .15s ease-out,opacity .15s ease-out}}
+.empty{padding:40px 20px;color:var(--ink-2);font-size:14px}
+@media (prefers-reduced-motion:no-preference){li,.chip,.more,.more button,.del,.grip,.barbtn,#refresh{transition:background-color .15s ease-out,opacity .15s ease-out}}
 '''
 
 JS = '''
@@ -689,7 +684,7 @@ function setCols(v) {
 $('#cols').value = localStorage.getItem('cols') || '2';
 
 /* Group by Window (default) or Site. Site view gathers each domain's tabs into one module, biggest first;
-   sites with a single tab share one module at the end. Rows keep their window letter as a small red tag. */
+   sites with a single tab share one module at the end. Rows keep their window letter as a small tag. */
 const group = () => localStorage.getItem('group') || 'window';
 function setGroup(v) { localStorage.setItem('group', v); regroup(); announce(v === 'site' ? 'Grouped by site.' : 'Grouped by window.'); }
 function regroup() {
@@ -738,9 +733,9 @@ addEventListener('resize', pack);
 '''
 
 ERROR_PAGE = '''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Tab Rehab</title>
-<style>body{font:14px/1.5 "Hiragino Sans",system-ui,sans-serif;color:#16181b;max-width:640px;margin:48px auto;padding:0 16px}
-h1{font-size:18px;margin:0 0 12px}.box{border:1px solid #d5d9de;border-top:3px solid #16181b;padding:12px 16px}
-code{font-size:12px;color:#4a5059}</style></head><body><h1>Tab Rehab can't read your Chrome tabs</h1>
+<style>body{font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#202124;max-width:640px;margin:48px auto;padding:0 16px}
+h1{font-size:20px;font-weight:600;margin:0 0 12px}.box{border:1px solid #e0e0e0;border-radius:8px;padding:12px 16px}
+a{color:#1a73e8}code{font-size:12px;color:#5f6368}</style></head><body><h1>Tab Rehab can't read your Chrome tabs</h1>
 <div class="box"><p><b>{reason}</b></p><p>Check that Google Chrome is open. The first run asks to let your terminal control Chrome.
 If you declined, turn it on under System Settings &gt; Privacy &amp; Security &gt; Automation, then <a href="/">try again</a>.</p>
 <p><code>{detail}</code></p></div></body></html>'''
@@ -806,7 +801,7 @@ def render(tabs):
 <button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
 <button id="closeDup" class="barbtn" onclick="selectDupes()" title="Selects every extra copy of a page. The copy in the earliest window is kept." hidden></button>
 <details id="tray" hidden><summary></summary><div class="pop"><ol></ol></div></details>
-<label for="group">Group by</label><select id="group" class="sel" onchange="setGroup(this.value)"><option value="window">Window</option><option value="site">Site</option></select>
+<label for="group">Group by</label><select id="group" class="picker" onchange="setGroup(this.value)"><option value="window">Window</option><option value="site">Site</option></select>
 <label for="cols">Columns</label><select id="cols" onchange="setCols(this.value)"><option value="auto">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
 <details id="keys"><summary>Shortcuts</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd> <kbd>Space</kbd></dt><dd>Select tab</dd><dt>Shift-click</dt><dd>Select a range</dd><dt><kbd>Delete</kbd></dt><dd>Close this tab, or the selection it's in</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd><dt>Click title</dt><dd>Switch to that tab</dd><dt>Drag grip</dt><dd>Move to a window or chip</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
 <p class="hint" id="hint">Click a title to switch to that tab. Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move it. <button onclick="hideHint()">Hide tips</button></p>
