@@ -612,7 +612,7 @@ function refresh(a) {
 function pack() {
   const main = $('main'), secs = $$('main section');
   if (!secs.length) return;
-  const want = localStorage.getItem('cols') || 'auto';
+  const want = localStorage.getItem('cols') || '2';
   const n = Math.max(1, Math.min(secs.length, want === 'auto' ? Math.floor((main.clientWidth - 32 + 10) / 470) : +want));
   if (+main.dataset.cols === n) return;
   main.dataset.cols = n;
@@ -625,7 +625,7 @@ function setCols(v) {
   localStorage.setItem('cols', v);
   pack();
 }
-$('#cols').value = localStorage.getItem('cols') || 'auto';
+$('#cols').value = localStorage.getItem('cols') || '2';
 pack();
 addEventListener('resize', pack);
 (() => {
@@ -703,7 +703,7 @@ def render(tabs):
 <button id="closeDup" class="purge" onclick="closeDupes()" title="Keeps the first copy of each page" hidden></button>
 <details id="tray" hidden><summary></summary><div class="pop"><p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p><ol></ol></div></details>
 <label for="cols">Columns</label><select id="cols" onchange="setCols(this.value)"><option value="auto">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
-<details id="keys"><summary>Keys</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
+<details id="keys"><summary>Shortcuts</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
 <p class="hint">Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move a tab; its back/forward history is lost.</p>
 <p id="none" class="empty" hidden></p><main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
 <div id="toast" role="status" hidden></div><div id="live" class="sr-only" aria-live="polite"></div>

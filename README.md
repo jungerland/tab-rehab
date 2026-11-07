@@ -7,7 +7,7 @@ A local web page that lists every open Google Chrome tab, grouped by window, so 
 - **Close duplicates** keeps the first copy of each page and closes the rest.
 - **Undo** reopens what you just closed (press `u`), without back/forward history.
 - **Move** a tab to another window by dragging its grip, or with the move button (`m`).
-- **Filter** by title or URL. Press "Keys" on the page for every shortcut.
+- **Filter** by title or URL. Press "Shortcuts" on the page for every shortcut.
 
 macOS only. It talks to Chrome through AppleScript. Python 3 standard library, no dependencies.
 
