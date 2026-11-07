@@ -562,6 +562,9 @@ function closeMenu(refocus) {
   menuFor = null;
 }
 document.addEventListener('mousedown', e => { if (!e.target.closest('#menu, .mv')) closeMenu(false); });
+document.addEventListener('mousedown', e => {   // popovers close when you click anywhere else
+  $$('#keys[open], #tray[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; });
+});
 addEventListener('scroll', () => closeMenu(false), {passive: true});
 
 /* Shortcuts */
