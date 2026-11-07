@@ -220,8 +220,15 @@ section h2 .all{margin:0 -2px 0 0}
 #keys dd{margin:0;color:var(--ink-2)}
 .linkbtn{border:0;background:none;padding:0 4px;height:24px;font:inherit;font-weight:700;color:var(--red-ink);cursor:pointer;
   text-decoration:underline;text-underline-offset:2px}
-#refresh{font-weight:600;color:var(--ink);border-bottom:1px solid var(--rule-strong)}
-#refresh:hover{border-color:var(--ink)}
+.barbtn,#refresh{height:28px;display:inline-flex;align-items:center;padding:0 10px;border:1px solid var(--rule-strong);border-radius:2px;
+  background:#fff;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.barbtn:hover,#refresh:hover{border-color:var(--ink)}
+.chip.nomatch{opacity:.45}
+.hint button{border:0;background:none;padding:0 2px;font:inherit;font-weight:600;color:var(--ink);text-decoration:underline;
+  text-underline-offset:2px;cursor:pointer}
+li.dup .host::before{content:"duplicate";display:inline-block;margin-right:6px;padding:0 4px;border:1px solid var(--rule-strong);
+  border-radius:2px;color:var(--ink-2);font-size:10px;line-height:14px}
+li.dup .host.err::before{content:none}
 .hint{margin:0;padding:6px 16px;color:var(--ink-2);border-bottom:1px solid var(--rule)}
 main{display:flex;align-items:flex-start;gap:10px;padding:10px 16px 80px}
 .col{flex:1 1 0;min-width:0}
@@ -328,6 +335,11 @@ async function copyUrl(btn) {
 /* Closing, undo */
 const closed = [];          // newest last: {li, w, url, title}
 let lastBatch = null;
+function tally(n) {   // tabs closed this session, kept across Refresh in this browser tab
+  const v = Math.max(0, (+sessionStorage.getItem('closed') || 0) + n);
+  sessionStorage.setItem('closed', v);
+  return v;
+}
 async function closeRows(lis) {
   if (!lis.length) return;
   lis.forEach(li => li.classList.add('busy'));
@@ -349,6 +361,7 @@ async function closeRows(lis) {
   if (!done.length) return;
   closed.push(...done);
   lastBatch = done;
+  tally(done.length);
   updateCounts(); renderTray();
   if (hadFocus) focusRow(next && !next.hidden ? next : null);
   const codes = [...new Set(done.map(d => d.code))];
@@ -358,36 +371,56 @@ function closeTab(btn) { return closeRows([btn.closest('li')]); }
 function closeSelected() { return closeRows(rows().filter(li => li.classList.contains('sel') && !li.hidden)); }
 function closeShown() { return closeRows(rows().filter(li => !li.hidden)); }
 function dupes() {
-  const seen = new Set();
-  return visible().filter(li => seen.has(li.dataset.url) || !seen.add(li.dataset.url));
+  // Keep the copy in the earliest window letter (then the first in that window), whatever the column layout.
+  const seen = new Set(), n = li => +li.closest('section').dataset.n;
+  return visible().sort((a, b) => n(a) - n(b)).filter(li => seen.has(li.dataset.url) || !seen.add(li.dataset.url));
 }
-function closeDupes() { return closeRows(dupes()); }
+function selectDupes() {
+  const d = dupes();
+  d.forEach(li => setSel(li, true));
+  updateBar();
+  announce('Selected ' + plural(d.length, 'duplicate') + '.');
+  $('#closeSel').focus();
+}
 function undoLast() {
-  const batch = (lastBatch || []).filter(e => closed.includes(e));
+  const ready = e => closed.includes(e) && !e.pending;
+  const batch = (lastBatch || []).filter(ready);
   lastBatch = null;
-  if (batch.length) { $('#toast').hidden = true; reopen(batch); }
-  else if (closed.length) reopen([closed[closed.length - 1]]);
+  if (batch.length) reopen(batch);
+  else { const last = closed.filter(ready).pop(); if (last) reopen([last]); }
 }
 async function reopen(entries) {
-  let lost = 0;
+  // Claim entries first so a second Undo or tray click can't reopen them again while this runs.
+  entries = entries.filter(e => closed.includes(e) && !e.pending);
+  if (!entries.length) return;
+  entries.forEach(e => e.pending = true);
+  renderTray();
+  let lost = 0, done = 0, err = null;
   for (const e of entries) {
+    if (entries.length > 1) toast('Reopening ' + (done + 1) + ' of ' + entries.length + '…');
     const r = await call('/reopen', {w: e.w, url: e.url});
-    if (!r.ok) { toast("Couldn't reopen: " + r.error); return; }
-    closed.splice(closed.indexOf(e), 1);
+    if (!r.ok) { err = r.error; break; }
+    const i = closed.indexOf(e);
+    if (i >= 0) closed.splice(i, 1);
+    done++;
     const sec = $('section[data-w="' + r.data.w + '"]');
     if (sec) { e.li.dataset.w = r.data.w; e.li.dataset.t = r.data.t; sec.querySelector('ul').appendChild(e.li); }
     else lost++;
   }
+  entries.forEach(e => e.pending = false);
+  tally(-done);
   updateCounts(); renderTray();
-  toast('Reopened ' + plural(entries.length, 'tab') + '.' + (lost ? ' Refresh to see ' + (lost === 1 ? 'it' : 'them') + '.' : ''));
+  if (err) toast('Reopened ' + done + ' of ' + entries.length + ". Couldn't reopen the rest: " + err);
+  else toast('Reopened ' + plural(done, 'tab') + ' at the end of ' + (entries.length === 1 ? 'its' : 'their') + ' window.' + (lost ? ' Refresh to see ' + (lost === 1 ? 'it' : 'them') + '.' : ''));
 }
 function renderTray() {
   const tray = $('#tray');
-  tray.hidden = !closed.length;
-  tray.querySelector('summary').textContent = 'Recently closed (' + closed.length + ')';
+  const list = closed.filter(e => !e.pending);
+  tray.hidden = !list.length;
+  tray.querySelector('summary').textContent = 'Recently closed (' + list.length + ')';
   const ol = tray.querySelector('ol');
   ol.innerHTML = '';
-  closed.slice().reverse().forEach(e => {
+  list.reverse().forEach(e => {
     const li = document.createElement('li');
     li.innerHTML = '<span class="tab"></span><span class="mono"></span><span class="title"></span><button class="linkbtn">Reopen</button>';
     li.querySelector('.tab').textContent = e.code;
@@ -441,9 +474,11 @@ function updateBar() {
   $('#closeSel').textContent = 'Close ' + sel + ' selected';
   $('#closeShown').hidden = !!sel || !q || !shown;
   $('#closeShown').textContent = 'Close all ' + shown + ' shown';
-  const d = dupes().length;
-  $('#closeDup').hidden = !!sel || !d;
-  $('#closeDup').textContent = 'Close ' + plural(d, 'duplicate');
+  const dl = dupes(), ds = new Set(dl);
+  rows().forEach(li => li.classList.toggle('dup', ds.has(li)));
+  const d = dl.filter(li => !li.classList.contains('sel')).length;
+  $('#closeDup').hidden = !d;
+  $('#closeDup').textContent = 'Select ' + plural(d, 'duplicate');
   $$('main section').forEach(s => {
     const vis = [...s.querySelectorAll('li')].filter(li => !li.hidden), on = vis.filter(li => li.classList.contains('sel')).length;
     const box = s.querySelector('.all');
@@ -559,8 +594,7 @@ document.addEventListener('keydown', e => {
     box.checked = !box.checked; setSel(li, box.checked); lastPick = li; updateBar();
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
     e.preventDefault();
-    const sel = visible().filter(r => r.classList.contains('sel'));
-    closeRows(sel.length ? sel : [li]);
+    closeRows(li.classList.contains('sel') ? visible().filter(r => r.classList.contains('sel')) : [li]);
   } else if (e.key === 'm') {
     e.preventDefault(); openMove(li.querySelector('.mv'));
   }
@@ -572,19 +606,19 @@ function drop(e) {
   if (li) moveRow(li, w);
 }
 function jump(chip) {
-  $('section[data-w="' + chip.dataset.w + '"]').scrollIntoView({block: 'start'});
+  const s = $('section[data-w="' + chip.dataset.w + '"]');
+  if (s.hidden) { announce('No tabs in window ' + s.dataset.code + ' match the filter.'); return; }
+  s.scrollIntoView({block: 'start'});
 }
 
 /* Counts and filter */
 function updateCounts() {
   $$('main section').forEach(s => {
-    const n = s.querySelectorAll('li').length;
     const chip = $('.chip[data-w="' + s.dataset.w + '"]');
-    s.querySelector('.count').textContent = plural(n, 'tab');
-    if (chip) { chip.querySelector('.n').textContent = n; chip.hidden = !n; }
+    if (chip) chip.hidden = !s.querySelector('li');
   });
-  const wins = $$('main section').filter(s => s.querySelector('li')).length;
-  $('#total').textContent = plural(rows().length, 'tab') + ' in ' + plural(wins, 'window');
+  const wins = $$('main section').filter(s => s.querySelector('li')).length, gone = tally(0);
+  $('#total').textContent = plural(rows().length, 'tab') + ' in ' + plural(wins, 'window') + (gone ? ', ' + gone + ' closed this session' : '');
   filter();
 }
 function filter() {
@@ -597,11 +631,17 @@ function filter() {
       li.hidden = !hit; if (hit) { any = true; shown++; }
     });
     s.hidden = !any;
+    const all = s.querySelectorAll('li').length, vis = s.querySelectorAll('li:not([hidden])').length;
+    s.querySelector('.count').textContent = q ? vis + ' of ' + plural(all, 'tab') : plural(all, 'tab');
+    const chip = $('.chip[data-w="' + s.dataset.w + '"]');
+    if (chip) { chip.querySelector('.n').textContent = q ? vis : all; chip.classList.toggle('nomatch', !!q && !vis); }
   });
   $('#shown').textContent = q ? shown + ' of ' + plural(rows().length, 'tab') : '';
   const none = $('#none');
   none.hidden = shown > 0;
-  none.textContent = rows().length ? 'No tabs match "' + $('#q').value.trim() + '". Press Esc to clear the filter.' : 'No tabs left. Open some in Chrome, then refresh.';
+  const gone = tally(0);
+  none.textContent = rows().length ? 'No tabs match "' + $('#q').value.trim() + '". Press Esc to clear the filter.'
+    : gone ? 'All clear. You closed ' + plural(gone, 'tab') + ' this session.' : 'No tabs left. Open some in Chrome, then refresh.';
   updateBar();
 }
 function refresh(a) {
@@ -626,12 +666,14 @@ function setCols(v) {
   pack();
 }
 $('#cols').value = localStorage.getItem('cols') || '2';
+function hideHint() { localStorage.setItem('hint', 'off'); $('#hint').hidden = true; announce('Tips hidden. They are under Shortcuts.'); }
+if (localStorage.getItem('hint') === 'off') $('#hint').hidden = true;
 pack();
 addEventListener('resize', pack);
 (() => {
   const q = new URLSearchParams(location.search).get('q');
   if (q) $('#q').value = q;
-  filter();
+  updateCounts();
 })();
 '''
 
@@ -682,7 +724,7 @@ def render(tabs):
         doms = ", ".join(h for h, _ in Counter(host_of(t["url"]) for t in wtabs).most_common(2))
         drop = 'ondragover="dragOver(event)" ondragleave="this.classList.remove(\'over\')" ondrop="drop(event)"'
         sections.append(
-            f'<section data-w="{w}" data-code="{code}" aria-label="Window {code}" {drop}>'
+            f'<section data-w="{w}" data-code="{code}" data-n="{codes[w]}" aria-label="Window {code}" {drop}>'
             f'<h2><span class="tab">{code}</span><input type="checkbox" class="all" onclick="pickAll(this)" '
             f'title="Select every shown tab in this window" aria-label="Select all tabs in window {code}">Window {code} <span class="count">{plural(len(wtabs), "tab")}</span>'
             f'<span class="doms">{html.escape(doms)}</span></h2><ul>{"".join(rows)}</ul></section>'
@@ -700,11 +742,11 @@ def render(tabs):
 <span id="shown"></span><div id="chips">{"".join(chips)}</div>
 <button id="closeSel" class="purge" onclick="closeSelected()" hidden></button>
 <button id="closeShown" class="purge" onclick="closeShown()" hidden></button>
-<button id="closeDup" class="purge" onclick="closeDupes()" title="Keeps the first copy of each page" hidden></button>
-<details id="tray" hidden><summary></summary><div class="pop"><p class="note">Reopening loads the page fresh. Back/forward history is not kept.</p><ol></ol></div></details>
+<button id="closeDup" class="barbtn" onclick="selectDupes()" title="Selects every extra copy of a page. The copy in the earliest window is kept." hidden></button>
+<details id="tray" hidden><summary></summary><div class="pop"><ol></ol></div></details>
 <label for="cols">Columns</label><select id="cols" onchange="setCols(this.value)"><option value="auto">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
-<details id="keys"><summary>Shortcuts</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd></dt><dd>Select tab</dd><dt><kbd>Delete</kbd></dt><dd>Close selected, or this tab</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
-<p class="hint">Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move a tab; its back/forward history is lost.</p>
+<details id="keys"><summary>Shortcuts</summary><div class="pop"><dl><dt><kbd>/</kbd></dt><dd>Filter</dd><dt><kbd>Esc</kbd></dt><dd>Clear filter</dd><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>j</kbd><kbd>k</kbd></dt><dd>Move between tabs</dd><dt><kbd>x</kbd> <kbd>Space</kbd></dt><dd>Select tab</dd><dt>Shift-click</dt><dd>Select a range</dd><dt><kbd>Delete</kbd></dt><dd>Close this tab, or the selection it's in</dd><dt><kbd>m</kbd></dt><dd>Move to another window</dd><dt><kbd>u</kbd></dt><dd>Undo last close</dd><dt>Click title</dt><dd>Switch to that tab</dd><dt>Drag grip</dt><dd>Move to a window or chip</dd></dl></div></details><a id="refresh" href="/" onclick="refresh(this)">Refresh</a></div>
+<p class="hint" id="hint">Click a title to switch to that tab. Check tabs to close them together (shift-click for a range). Drag a grip onto a window or chip to move it. <button onclick="hideHint()">Hide tips</button></p>
 <p id="none" class="empty" hidden></p><main>{body}</main><div id="menu" role="menu" aria-label="Move to window" tabindex="-1" hidden></div>
 <div id="toast" role="status" hidden></div><div id="live" class="sr-only" aria-live="polite"></div>
 <script>{JS.replace("__TOKEN__", json.dumps(TOKEN))}</script></body></html>'''
