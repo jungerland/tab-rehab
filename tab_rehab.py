@@ -197,7 +197,8 @@ h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0}
 .purge{height:28px;padding:0 12px;border:0;border-radius:2px;background:var(--red);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 .purge:hover{background:var(--red-ink)}
 .purge:disabled{opacity:.6;cursor:progress}
-#chips{display:flex;gap:6px;flex:1;min-width:120px;overflow-x:auto;scrollbar-width:thin}
+#chips{display:flex;gap:6px;flex:1;min-width:120px;overflow-x:auto;scrollbar-width:thin;visibility:hidden}
+body.dragging #chips{visibility:visible}
 .chip{flex:none;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 0;border:1px solid var(--rule-strong);
   border-radius:2px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}
 .chip .tab{height:100%;border-radius:1px 0 0 1px}
@@ -493,10 +494,12 @@ function dragStart(e) {
   dragged = e.target.closest('li');
   e.dataTransfer.setDragImage(dragged.querySelector('.title'), 10, 10);
   dragged.classList.add('moving');
+  setTimeout(() => document.body.classList.add('dragging'));   // chips show only while dragging, as drop targets
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', dragged.dataset.t);
 }
 function dragEnd() {
+  document.body.classList.remove('dragging');
   if (dragged) dragged.classList.remove('moving');
   $$('.over').forEach(s => s.classList.remove('over'));
   dragged = null;
