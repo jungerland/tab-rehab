@@ -1,249 +1,158 @@
 ---
 name: Tab Rehab
-description: Every open Chrome tab on one dense page, built for a fast purge.
+description: Every open Chrome tab on one page, grouped by window or site, built for a fast purge.
 colors:
-  utility-red: "#d7000f"
-  red-ink: "#b5000c"
-  red-wash: "#fff1f1"
-  ink: "#16181b"
-  ink-2: "#4a5059"
-  ink-3: "#5f6670"
+  ink: "#202124"
+  ink-2: "#5f6368"
+  ink-3: "#6b6f75"
   ground: "#ffffff"
-  panel: "#f3f4f6"
-  row-hover: "#f7f8fa"
-  rule: "#d5d9de"
-  row-rule: "#eceef1"
-  rule-strong: "#8a919b"
+  panel: "#f4f4f4"
+  hover: "#f2f2f2"
+  rule: "#e0e0e0"
+  rule-strong: "#c4c4c4"
+  blue: "#1a73e8"
+  blue-ink: "#1765cc"
+  blue-wash: "#e8f0fe"
+  error: "#c5221f"
+  snackbar: "#323232"
+  snackbar-action: "#8ab4f8"
 typography:
   headline:
-    fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, Segoe UI, Noto Sans, system-ui, sans-serif"
-    fontSize: "19px"
-    fontWeight: 800
-    letterSpacing: "-0.02em"
+    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif"
+    fontSize: "20px"
+    fontWeight: 600
   title:
-    fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, Segoe UI, Noto Sans, system-ui, sans-serif"
-    fontSize: "12px"
-    fontWeight: 700
+    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif"
+    fontSize: "13px"
+    fontWeight: 600
   body:
-    fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, Segoe UI, Noto Sans, system-ui, sans-serif"
-    fontSize: "12px"
+    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif"
+    fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.4
     fontFeature: "tnum"
-  row-title:
-    fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, Segoe UI, Noto Sans, system-ui, sans-serif"
-    fontSize: "12.5px"
-    fontWeight: 400
   label:
-    fontFamily: "Hiragino Sans, Hiragino Kaku Gothic ProN, Segoe UI, Noto Sans, system-ui, sans-serif"
-    fontSize: "11px"
+    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif"
+    fontSize: "12px"
     fontWeight: 400
 rounded:
-  hairline: "1px"
-  sm: "2px"
+  badge: "4px"
+  control: "6px"
+  card: "8px"
+  pill: "15px"
 spacing:
-  xxs: "2px"
   xs: "4px"
-  sm: "6px"
-  md: "8px"
-  lg: "10px"
-  xl: "16px"
-  row: "30px"
+  sm: "8px"
+  md: "12px"
+  lg: "16px"
+  xl: "20px"
+  row: "32px"
 components:
-  window-tab:
-    backgroundColor: "{colors.utility-red}"
-    textColor: "{colors.ground}"
-    typography: "{typography.title}"
-    padding: "0 6px"
-    width: "26px"
-  window-header:
-    backgroundColor: "{colors.panel}"
+  window-card:
+    backgroundColor: "{colors.ground}"
+    border: "1px solid {colors.rule}"
+    rounded: "{rounded.card}"
+  card-header:
+    backgroundColor: "{colors.ground}"
     textColor: "{colors.ink}"
     typography: "{typography.title}"
-    height: "28px"
+    height: "40px"
   tab-row:
     backgroundColor: "{colors.ground}"
     textColor: "{colors.ink}"
-    typography: "{typography.row-title}"
+    typography: "{typography.body}"
     height: "{spacing.row}"
+  tab-row-hover:
+    backgroundColor: "{colors.hover}"
   tab-row-selected:
-    backgroundColor: "{colors.red-wash}"
-  button-purge:
-    backgroundColor: "{colors.utility-red}"
+    backgroundColor: "{colors.blue-wash}"
+  button-primary:
+    backgroundColor: "{colors.blue}"
     textColor: "{colors.ground}"
-    rounded: "{rounded.sm}"
-    padding: "0 12px"
-    height: "28px"
-  button-purge-hover:
-    backgroundColor: "{colors.red-ink}"
-  window-chip:
+    rounded: "{rounded.control}"
+    height: "32px"
+  button-secondary:
     backgroundColor: "{colors.ground}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sm}"
-    height: "26px"
+    textColor: "{colors.blue}"
+    border: "1px solid {colors.rule-strong}"
+    rounded: "{rounded.control}"
+    height: "32px"
   input-filter:
     backgroundColor: "{colors.ground}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sm}"
-    padding: "0 8px"
-    height: "28px"
-    width: "280px"
+    border: "1px solid {colors.rule-strong}"
+    rounded: "{rounded.control}"
+    height: "32px"
+    width: "300px"
   icon-button:
     backgroundColor: "transparent"
-    textColor: "{colors.ink-3}"
-    rounded: "{rounded.sm}"
-    size: "24px"
+    textColor: "{colors.ink-2}"
+    rounded: "50%"
+    size: "28px"
+  window-badge:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.badge}"
+    size: "20px"
   toast:
-    backgroundColor: "{colors.ink}"
+    backgroundColor: "{colors.snackbar}"
     textColor: "{colors.ground}"
-    rounded: "{rounded.sm}"
-    padding: "10px 12px"
+    rounded: "{rounded.control}"
 ---
 
 # Design System: Tab Rehab
 
 ## Overview
 
-**Creative North Star: "The Departure Board"**
+**Direction: the category standard, played straight.** Tab Rehab looks the way Chrome's own tab search, OneTab, and Tab Manager Plus look: a plain list grouped by window, neutral grays, one blue accent, nothing extra. It should sit beside Chrome's settings pages without standing out. Brand lives in the name and in the craft of the details, not in a visual world.
 
-Tab Rehab borrows the grammar of a Japanese high-density portal: white ground, near-black ink, cool gray hairlines and panel fills, and one utility red. The page exists so a 100-tab purge reads as one scan, so density is the feature. Rows are one line and 30px tall, window modules pack into columns, and every pixel of chrome either names a window, counts something, or closes something.
+This replaced the High-Density Grid look (white, ink, utility red) on 2026-11-07. The owner's monitors run a warm color tone, which turned the cool gray fills pink and made the red harsh. The fix is fewer fills and no red.
 
-The system is flat and ruled. Structure comes from hairlines, a 2px ink rule under the sticky bar, and gray header bands, not from cards or shadows. Red carries meaning, never decoration: a window's letter tab, and the act of purging. Everything else is ink on white at three steps of gray.
-
-Desktop only. There are no mobile layouts and none should be designed.
-
-**Key Characteristics:**
-- One-line, fixed-height rows (30px) with ellipsis, never wrapping.
-- A red letter tab (A, B, C...) names each window everywhere it appears.
-- Hairline rules and gray bands instead of shadows or rounded cards.
-- Near-square corners (2px) throughout.
-- Tabular numerals everywhere, since counts are the main data.
+**Key characteristics:**
+- White everywhere. Gray appears only as hover, small badges, and the duplicate pill.
+- One accent: blue, for primary actions, selection, focus, and links.
+- No red anywhere except error text.
+- Rounded, Material-like controls: 6px buttons and fields, 8px cards, round icon buttons.
+- One-line 32px rows in fixed columns.
 
 ## Colors
 
-A white-and-ink palette with three grays and a single utility red that is spent only on identity and purge.
-
-### Primary
-- **Utility Red** (`utility-red`): the window letter tab (module header, bar chips, Move-to menu, recently closed tray), the purge buttons, checkbox accent, text selection, and the filter caret. Red on hover for the trash button.
-- **Pressed Red** (`red-ink`): purge button hover, the trash icon when its row is hovered, focused, or selected, and text links inside the tray.
-- **Selection Wash** (`red-wash`): background of a row checked for closing.
-
-### Neutral
-- **Ink** (`ink`): primary text, the 2px rule under the sticky bar, focus outlines, drop-target outlines, and the toast background.
-- **Slate** (`ink-2`): secondary text: totals, counts, the hint line, field labels, Shortcuts descriptions.
-- **Pewter** (`ink-3`): tertiary text: hosts, top domains, placeholder, and resting action icons (including trash).
-- **Ground** (`ground`): page and module background.
-- **Panel Gray** (`panel`): the sticky bar, window header bands, and the drop-target fill.
-- **Row Hover** (`row-hover`): row background on hover or focus.
-- **Hairline** (`rule`): module borders and section dividers.
-- **Row Hairline** (`row-rule`): the faint divider between rows.
-- **Strong Rule** (`rule-strong`): input, chip, and popover borders, the grip, and the scrollbar thumb.
-
-Site monograms are the one place other hues appear. Each host gets a hue from its name, drawn as a pale tint behind a dark letter of the same hue (`hsl(h 55% 91%)` behind `hsl(h 60% 26%)`). They stay 18px and quiet.
+- **Blue** (`#1a73e8`): primary buttons (Close N selected, Close all N shown), secondary button text (Select duplicates, Refresh), checkbox accent, focus ring, the filter's focus border, drop target outline, "Hide tips" link.
+- **Blue Wash** (`#e8f0fe`): selected rows, drop target fill, secondary button hover.
+- **Ink** (`#202124`): titles and primary text. **Ink 2** (`#5f6368`): counts, hosts, labels, icons at rest.
+- **Rule** (`#e0e0e0`): card borders and the bar's bottom line. **Rule Strong** (`#c4c4c4`): control borders.
+- **Hover** (`#f2f2f2`) and **Panel** (`#f4f4f4`): row hover, window badges, the duplicate pill, `kbd`. These are true neutrals (equal RGB), never blue-tinted, so a warm screen doesn't turn them pink.
+- **Error** (`#c5221f`): inline row errors only.
+- Site monograms keep their per-host hue tints. They stand in for favicons.
 
 ### Named Rules
-**The Two Meanings Rule.** Red means a window's identity or the act of purging. It is not used for hover, drop targets, menu highlight, or emphasis. Drop targets and menu hover use an ink outline on Panel Gray instead.
+**The One Accent Rule.** Blue is the only accent. Closing tabs uses the same blue primary button as any other main action, the way Chrome's own dialogs do. Undo is the safety net, not color.
 
-**The Quiet Trash Rule.** The trash icon rests in Pewter. It turns red only when its row is hovered, focused, or selected, and fills red on direct hover. At 100 tabs, 100 red icons would drown the window tabs.
+**The No Pink Rule.** No blue-tinted grays and no filled gray bands. Structure comes from white cards with a light border.
 
 ## Typography
 
-**Body Font:** Hiragino Sans (with Hiragino Kaku Gothic ProN, Segoe UI, Noto Sans, system-ui)
-
-**Character:** a compact gothic sans at small sizes, chosen for density and clean Latin and numerals. One family does all the work; hierarchy comes from weight, not size.
-
-### Hierarchy
-- **Headline** (800, 19px, -0.02em): the page title only.
-- **Title** (700, 12px): window header names, window letter tabs, chip counts, purge buttons.
-- **Row Title** (400, 12.5px): tab titles in rows. The only text slightly larger than body, because it is what the eye scans.
-- **Body** (400, 12px, 1.4): everything else, with tabular numerals on by default.
-- **Label** (400, 11px): hosts in rows and `kbd` keys.
-
-### Named Rules
-**The Weight Not Size Rule.** The ramp spans 11 to 19px. New hierarchy is made with weight (400, 600, 700) and color (Ink, Slate, Pewter), not by adding sizes.
-
-**The Counted Rule.** Tabular numerals stay on page-wide. Counts are the data.
+The platform system font (San Francisco on Mac, Segoe UI on Windows, Roboto on Linux). Body and rows 13px, page title 20px/600, card headers 13px/600, hosts and labels 12px. Tabular numerals for counts.
 
 ## Layout
 
-A sticky Panel Gray bar sits under a short header and holds, left to right: the labeled filter, the "N of M" count, one chip per window (hidden at rest, so the bar stays quiet; the chips appear only while a tab is being dragged, as drop targets for windows that are off screen), red purge buttons when relevant (close selected, close all shown), a white "Select N duplicates" button, then the Group by menu (Window or Site) and the Columns picker, the recently closed tray, Shortcuts, and Refresh pushed right. Chips sit before the buttons so they never shift when one appears. A 2px Ink rule closes the bar. Below it, a one-line tips hint the user can hide (remembered), then the window modules. Duplicate rows carry a small bordered "duplicate" tag in Slate before the host; it is not red, because selecting is not purging.
+A short header (title and running total), then a sticky white bar with a bottom rule: the labeled filter, the "N of M" count, the window chips (hidden at rest, shown only while dragging, as drop targets), primary purge buttons when relevant, Select duplicates, the Group by menu (Window or Site), Columns, the Recently closed tray, Shortcuts, and Refresh. Below it, a one-line tips line the user can hide.
 
-Modules pack into fixed columns (at least 460px wide, 10px gap, 10px between modules), so short windows sit under each other instead of leaving holes. Each window is assigned to a column once, at page load, by shortest column first, and stays there while tabs close; the page repacks only when a window resize changes the column count. Windows are lettered by Chrome window id and keep their letter for as long as the server runs. In Group by Site, modules are websites (biggest first, single-tab sites share one "Sites with one tab" module at the end). The module header leads with the site monogram instead of a red letter tab, and each row swaps its monogram for a small red window letter tag, so red still means window identity. Page padding is 16px at the sides.
-
-Rows are a fixed grid: checkbox, grip, monogram, title (flexible, ellipsis), host (max 170px), trash. View, copy, and move appear on hover or focus as an overlay on top of the host cell, so the row never reflows.
-
-The spacing scale is small and tight: 2, 4, 6, 8, 10, 16px, plus the 30px row unit.
-
-## Elevation & Depth
-
-Flat by default. Depth is drawn with rules and fills: hairline module borders, Panel Gray header bands, and the 2px Ink rule under the sticky bar. Shadows exist only on things that float over the page.
-
-### Shadow Vocabulary
-- **Float** (`box-shadow: 0 2px 6px rgba(22,24,27,.16)`): popovers (tray, Shortcuts) and the Move-to menu.
-- **Toast** (`box-shadow: 0 8px 24px rgba(22,24,27,.25)`): the undo toast at bottom left.
-
-### Named Rules
-**The Only-What-Floats Rule.** If it sits in the page flow, it has no shadow. Only popovers, menus, and the toast lift.
-
-## Shapes
-
-Near-square everywhere: 2px corners on buttons, chips, inputs, monograms, `kbd`, and the toast. Modules and popovers are square-cornered with a 1px border. The window letter tab is a solid red block that fills the full height of its header or chip, flush left, which makes it read like a file tab.
+Window cards pack into fixed columns (Columns picker: Auto or 1 to 4, default 2; 16px gaps). Each window is assigned a column once, at load, by shortest column first, and stays there while tabs close. Windows are lettered by Chrome window id and keep their letter while the server runs. In Group by Site, cards are websites, biggest first, with single-tab sites sharing a "Sites with one tab" card at the end.
 
 ## Components
 
-### Window Letter Tab (signature)
-A solid red block, white bold letter, at least 26px wide, full height of its container. It names a window in the module header, the bar chip, the Move-to menu, and each row of the recently closed tray. Any new surface that refers to a window uses it.
-
-### Window Module
-- **Border:** 1px Hairline, square corners, white ground.
-- **Header:** 28px Panel Gray band with a Strong Rule underline. Letter tab, "Window A" in bold, tab count in Slate, top two domains in Pewter pushed right with ellipsis.
-- **Drop target:** 2px Ink outline (inset) and Panel Gray fill while a tab is dragged over.
-
-### Tab Row
-- **Shape:** 30px, one line, Row Hairline divider, no last-row divider.
-- **States:** hover or focus gets Row Hover; selected gets Selection Wash; moving or busy drops to 45% opacity.
-- **Actions:** view, copy, move as 24px icon buttons (15px stroked SVG, 1.6 stroke) overlaying the host cell on hover or focus. Trash is always present (see The Quiet Trash Rule).
-- **Error:** a row error replaces the host text inline, in bold Ink (not red). The error page uses an Ink top rule. Red stays reserved for window identity and purge.
-
-### Buttons
-- **Purge (primary):** Utility Red, white bold text, 28px tall, 12px side padding, 2px corners. Hover deepens to Pressed Red. Only purge actions use it.
-- **Bar controls (Tray, Shortcuts, Select duplicates, Refresh, Columns):** white, 1px Strong Rule border, 28px, 2px corners; border goes Ink on hover or when open.
-- **Refresh:** a text link with a Strong Rule underline that turns Ink on hover.
-- **Icon buttons:** transparent, Pewter, 24px; hover gets a light gray fill and Ink.
-
-### Chips
-- **Style:** white, 1px Strong Rule border, 26px tall, 2px corners, letter tab flush left, bold count.
-- **State:** hover turns the border Ink. Same Ink-outline drop-target treatment as modules.
-
-### Inputs / Fields
-- **Style:** 280px by 28px, white, 1px Strong Rule border, 2px corners, 13px text, Pewter placeholder, red caret. Always paired with a visible label.
-- **Focus:** the global 2px Ink outline, 1px offset.
-
-### Popovers and Menu
-White, 1px Strong Rule border, Float shadow. The Move-to menu lists windows by letter tab; hover and keyboard focus use Panel Gray with an inset 2px Ink outline.
-
-### Toast
-Ink background, white text, 2px corners, Toast shadow, bottom left. Its action (Undo) is a white underlined text button.
+- **Window card:** white, 1px Rule border, 8px corners. Header 40px: select-all checkbox, "Window A" in 600, count in Ink 2, top two sites right-aligned. In Site view the header leads with the site monogram.
+- **Tab row:** 32px, no dividers. Checkbox, drag grip (visible on hover or focus only), site monogram, title (ellipsis; click switches to the tab), host, then a round trash button. View, copy, and move appear on hover or focus over the host. Hover is Hover gray, selected is Blue Wash. In Site view the monogram is swapped for a window badge.
+- **Window badge:** 20px, 4px corners, Panel gray with Ink letter. Used in chips, the Move-to menu, the Recently closed tray, and Site-view rows.
+- **Buttons:** primary is filled Blue with white text; secondary is white with a Rule Strong border and Blue text, Blue Wash on hover. Icon buttons are 28px circles, gray on hover.
+- **Duplicate pill:** "duplicate" in 11px Ink 2 on Panel gray, 8px radius, before the host.
+- **Popovers and Move-to menu:** white, 1px Rule border, 8px corners, soft shadow (`0 4px 16px rgba(0,0,0,.12)`). They close on any outside click.
+- **Toast:** Material snackbar, `#323232` with white text and a light-blue Undo.
 
 ## Do's and Don'ts
 
-### Do:
-- **Do** use the red letter tab whenever a window is named, on any surface.
-- **Do** keep rows one line at 30px and truncate with ellipsis.
-- **Do** show drop targets and menu highlight with a 2px Ink outline on Panel Gray.
-- **Do** theme browser surfaces from the palette: scrollbars in Strong Rule on Panel Gray, red selection and caret, Ink focus outlines.
-- **Do** keep row actions as overlays so revealing them never shifts the row.
-
-### Don't:
-- **Don't** use red for hover, emphasis, drop targets, or decoration (The Two Meanings Rule).
-- **Don't** give in-flow elements shadows or rounded card corners above 2px.
-- **Don't** add type sizes to create hierarchy; use weight and the three grays.
+- **Do** keep every surface white; use borders, not fills, for structure.
+- **Do** use standard controls (native select, checkbox, buttons) styled lightly.
+- **Don't** add a second accent color, red, or tinted grays.
+- **Don't** add decoration, textures, or a visual theme. The category standard is the point.
 - **Don't** design mobile layouts.
-
-## Open (not yet decided)
-
-These were considered in the finish review and deliberately not taken. They are open questions, not decisions.
-
-- **Display face.** The page title is set in the platform sans. A self-hosted condensed face would suit the world but means shipping a font file inside a single-file tool.
-- **DIN-style numerals** for counts and chips.
-- **Tag badges** on rows.

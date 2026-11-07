@@ -15,3 +15,7 @@ FIRST VIEWPORT: Title and total at top left. A sticky gray bar holds the filter 
 FORM: chosen challenger "High-Density Grid" (catalog japanese-high-density-web), over the assigned Garage Sale Dots. Seed key 9399ed3b. Signature move: the red letter tab names a window everywhere (module header, bar chips, and later the Move-to menu and undo tray).
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Redirection (2026-11-07)
+
+The owner took the category standard (canon) over High-Density Grid, after a safer re-roll. Reason: warm-toned monitors turned the cool gray fills pink and the utility red harsh. Craft bar: Chrome's tab search, OneTab, Tab Manager Plus. White surfaces, true-neutral grays, one blue accent, no red. Behavior is unchanged. DESIGN.md is replaced; the THESIS density goal and fixed columns stay.
