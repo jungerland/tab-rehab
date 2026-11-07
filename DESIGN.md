@@ -130,7 +130,7 @@ A white-and-ink palette with three grays and a single utility red that is spent 
 
 ### Neutral
 - **Ink** (`ink`): primary text, the 2px rule under the sticky bar, focus outlines, drop-target outlines, and the toast background.
-- **Slate** (`ink-2`): secondary text: totals, counts, the hint line, field labels, Keys descriptions.
+- **Slate** (`ink-2`): secondary text: totals, counts, the hint line, field labels, Shortcuts descriptions.
 - **Pewter** (`ink-3`): tertiary text: hosts, top domains, placeholder, and resting action icons (including trash).
 - **Ground** (`ground`): page and module background.
 - **Panel Gray** (`panel`): the sticky bar, window header bands, and the drop-target fill.
@@ -166,7 +166,7 @@ Site monograms are the one place other hues appear. Each host gets a hue from it
 
 ## Layout
 
-A sticky Panel Gray bar sits under a short header and holds, left to right: the labeled filter, the "N of M" count, one chip per window, purge buttons when relevant (close selected, close all shown, close duplicates), then the recently closed tray, Keys, and Refresh pushed right. Chips sit before the purge buttons so they never shift when a button appears. A 2px Ink rule closes the bar. Below it, a single one-line hint, then the window modules.
+A sticky Panel Gray bar sits under a short header and holds, left to right: the labeled filter, the "N of M" count, one chip per window, red purge buttons when relevant (close selected, close all shown), a white "Select N duplicates" button, then the Columns picker, the recently closed tray, Shortcuts, and Refresh pushed right. Chips sit before the buttons so they never shift when one appears. A 2px Ink rule closes the bar. Below it, a one-line tips hint the user can hide (remembered), then the window modules. Duplicate rows carry a small bordered "duplicate" tag in Slate before the host; it is not red, because selecting is not purging.
 
 Modules pack into fixed columns (at least 460px wide, 10px gap, 10px between modules), so short windows sit under each other instead of leaving holes. Each window is assigned to a column once, at page load, by shortest column first, and stays there while tabs close; the page repacks only when a window resize changes the column count. Windows are lettered by Chrome window id and keep their letter for as long as the server runs. Page padding is 16px at the sides.
 
@@ -179,7 +179,7 @@ The spacing scale is small and tight: 2, 4, 6, 8, 10, 16px, plus the 30px row un
 Flat by default. Depth is drawn with rules and fills: hairline module borders, Panel Gray header bands, and the 2px Ink rule under the sticky bar. Shadows exist only on things that float over the page.
 
 ### Shadow Vocabulary
-- **Float** (`box-shadow: 0 2px 6px rgba(22,24,27,.16)`): popovers (tray, Keys) and the Move-to menu.
+- **Float** (`box-shadow: 0 2px 6px rgba(22,24,27,.16)`): popovers (tray, Shortcuts) and the Move-to menu.
 - **Toast** (`box-shadow: 0 8px 24px rgba(22,24,27,.25)`): the undo toast at bottom left.
 
 ### Named Rules
@@ -207,7 +207,7 @@ A solid red block, white bold letter, at least 26px wide, full height of its con
 
 ### Buttons
 - **Purge (primary):** Utility Red, white bold text, 28px tall, 12px side padding, 2px corners. Hover deepens to Pressed Red. Only purge actions use it.
-- **Bar controls (Tray, Keys):** white, 1px Strong Rule border, 28px, 2px corners; border goes Ink when open.
+- **Bar controls (Tray, Shortcuts, Select duplicates, Refresh, Columns):** white, 1px Strong Rule border, 28px, 2px corners; border goes Ink on hover or when open.
 - **Refresh:** a text link with a Strong Rule underline that turns Ink on hover.
 - **Icon buttons:** transparent, Pewter, 24px; hover gets a light gray fill and Ink.
 

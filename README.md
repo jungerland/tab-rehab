@@ -4,7 +4,7 @@ A local web page that lists every open Google Chrome tab, grouped by window, so 
 
 - **Switch** to a tab by clicking its title (or the eye icon). Cmd-click opens the URL as a new tab instead.
 - **Close** any tab with one click (trash icon), or check several (one window at a time with its header checkbox) and close them together.
-- **Close duplicates** keeps the first copy of each page and closes the rest.
+- **Select duplicates** marks and selects every extra copy of a page, keeping the copy in the earliest window, so you can review them before closing.
 - **Undo** reopens what you just closed (press `u`), without back/forward history.
 - **Move** a tab to another window by dragging its grip, or with the move button (`m`).
 - **Filter** by title or URL. Press "Shortcuts" on the page for every shortcut.
